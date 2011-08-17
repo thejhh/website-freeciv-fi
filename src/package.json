@@ -1,0 +1,11 @@
+{
+    "name": "website-freeciv-fi"
+  , "version": "0.0.1"
+  , "private": true
+  , "dependencies": {
+      "express": "2.4.3"
+    , "jade": ">= 0.0.1"
+    , "socket.io": "0.7.7"
+    , "request": "2.0.0"
+  }
+}
