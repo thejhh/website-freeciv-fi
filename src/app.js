@@ -5,11 +5,28 @@
 
 var express = require('express'),
     request = require('request'),
+	config = require('./config.js'),
+	pg = require('pg'),
     sys = require('sys'),
+    util = require('util'),
     trim = require('snippets').trim,
     app = module.exports = express.createServer(),
 	expressValidate = require('express-validate');
 //	io = require('socket.io').listen(app);
+
+
+/* */
+function db_add_email(email, callback) {
+	var conString = config.pg || 'tcp://postgres:1234@localhost/postgres';
+	pg.connect(conString, function(err, client) {
+		if(err) return callback(err);
+		client.query("INSERT INTO "+config.ilmo_table+" (email) values($1)", [email], function(err, result) {
+			if(err) return callback(err);
+			console.log("Added email: %s". email);
+			callback();
+		});
+	});
+}
 
 // Configuration
 
@@ -51,14 +68,23 @@ app.get('/ilmo', function(req, res){
 
 app.post('/ilmo', function(req, res) {
 	var email = trim(""+req.body.email),
-	    error;
+	    error = true;
 	if(email === "") req.flash('error', "Sähköpostiosoite on tyhjä.");
 	else if(!email.match('@')) req.flash('error', "Sähköpostiosoite ei ole toimiva: " + email);
 	else {
-		req.flash('info', 'Sähköpostiosoite lisätty: ' + email);
-		req.flash('info', 'Lähetämme erillisen vahvistuksen vielä ennen pelin aloittamista.');
+		db_add_email(email, function(err) {
+			if(err) {
+				util.log('Error: '+err);
+				req.flash('error', 'Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.');
+			} else {
+				req.flash('info', 'Sähköpostiosoite lisätty: ' + email);
+				req.flash('info', 'Lähetämme erillisen vahvistuksen vielä ennen pelin aloittamista.');
+			}
+			res.redirect('/ilmo');
+		});
+		error = false;
 	}
-	res.redirect('/ilmo');
+	if(error) res.redirect('/ilmo');
 });
 
 app.listen(3000);
