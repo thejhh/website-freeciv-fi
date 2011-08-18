@@ -5,7 +5,10 @@
 
 var express = require('express'),
     request = require('request'),
-    app = module.exports = express.createServer();
+    sys = require('sys'),
+    trim = require('snippets').trim,
+    app = module.exports = express.createServer(),
+	expressValidate = require('express-validate');
 //	io = require('socket.io').listen(app);
 
 // Configuration
@@ -13,7 +16,10 @@ var express = require('express'),
 app.configure(function(){
 	app.set('views', __dirname + '/views');
 	app.set('view engine', 'jade');
+	
 	app.use(express.bodyParser());
+	app.use(express.cookieParser());
+	app.use(express.session({ secret: "keyboard cat" }));
 	app.use(express.methodOverride());
 	app.use(app.router);
 	app.use(express.static(__dirname + '/public'));
@@ -30,7 +36,29 @@ app.configure('production', function(){
 // Routes
 
 app.get('/', function(req, res){
-	res.render('index', {title: 'Our site'});
+	res.redirect('/ilmo');
+});
+
+app.get('/ilmo/thanks', function(req, res){
+	var flash = req.flash();
+	res.render('thanks', {title: 'Ilmoitus vastaanotettu', email:email, flash:flash });
+});
+
+app.get('/ilmo', function(req, res){
+	var flash = req.flash();
+	res.render('ilmo', {title: 'Ilmoittautuminen', flash:flash});
+});
+
+app.post('/ilmo', function(req, res) {
+	var email = trim(""+req.body.email),
+	    error;
+	if(email === "") req.flash('error', "Sähköpostiosoite on tyhjä.");
+	else if(!email.match('@')) req.flash('error', "Sähköpostiosoite ei ole toimiva: " + email);
+	else {
+		req.flash('info', 'Sähköpostiosoite lisätty: ' + email);
+		req.flash('info', 'Lähetämme erillisen vahvistuksen vielä ennen pelin aloittamista.');
+	}
+	res.redirect('/ilmo');
 });
 
 app.listen(3000);
