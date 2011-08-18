@@ -10,7 +10,6 @@ var express = require('express'),
     util = require('util'),
     trim = require('snippets').trim,
     app = module.exports = express.createServer(),
-	expressValidate = require('express-validate'),
     mysql = require('mysql'),
     client;
 
