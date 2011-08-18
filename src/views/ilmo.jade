@@ -1,0 +1,37 @@
+h1 Ilmoittautuminen
+
+p Tervetuloa uuden Freeciv-pelimme ilmoittautumiseen. 
+
+p 
+	| Aloitamme pelin kun ilmoittautuneita on 
+	b yli 30
+	|  tai viimeistään 
+	b ma 5.9.2011
+	| . Tänä vuonna peliin mahtuu 
+	b jopa 126 pelaajaa!
+
+p
+	| Lisätietoja pelistä löydät
+	a(href="http://freeciv.fi/wiki/", target="_blank") wikistämme
+	| .
+
+hr
+#ilmo
+	form(method='post', action='/ilmo')
+		| Sähköposti:
+		input(name='email')
+		input(type='submit', value='Lähetä')
+hr
+- if (flash)
+	- if (flash.error)
+		b Virheellisiä tietoja:
+		ul
+			- each msg in flash.error
+				li= msg
+		hr
+	- if (flash.info)
+		b Kiitos ilmoituksesta!
+		ul
+			- each msg in flash.info
+				li= msg
+		hr
