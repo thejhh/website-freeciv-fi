@@ -6,18 +6,18 @@
 var express = require('express'),
     request = require('request'),
 	config = require('./config.js'),
-	pg = require('pg'),
     sys = require('sys'),
     util = require('util'),
     trim = require('snippets').trim,
     app = module.exports = express.createServer(),
-	expressValidate = require('express-validate');
-//	io = require('socket.io').listen(app);
-
+	expressValidate = require('express-validate'),
+    mysql = require('mysql'),
+    client;
 
 /* */
-function db_add_email(email, callback) {
-	var conString = config.pg || 'tcp://postgres:1234@localhost/postgres';
+function pg_add_email(email, callback) {
+	var pg = require('pg'),
+	    conString = config.pg || 'tcp://postgres:1234@localhost/postgres';
 	pg.connect(conString, function(err, client) {
 		if(err) return callback(err);
 		client.query("INSERT INTO "+config.ilmo_table+" (email) values($1)", [email], function(err, result) {
@@ -26,6 +26,27 @@ function db_add_email(email, callback) {
 			callback();
 		});
 	});
+}
+
+/* */
+function mysql_add_email(email, callback) {
+	if(!client) client = mysql.createClient(config.mysql);
+	client.query(
+		'INSERT INTO '+config.ilmo_table+' SET email = ?',
+		[email],
+		function(err) {
+			if(err) return callback(err);
+			util.log("Added email: %s". email);
+			callback();
+		}
+	);
+}
+
+function db_add_email(email, callback) {
+	if(config.mysql) return mysql_add_email(email, callback);
+	if(config.pg) return pg_add_email(email, callback);
+	util.log("Error: No database settings!");
+	callback('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.');
 }
 
 // Configuration
