@@ -10,15 +10,6 @@ p
 	| .
 
 p
-	| Ilmoittautuneita: 
-	b= players
-	b /126
-	|  - vapaana vielä
-	b= free_players
-	b  KPL
-	| !
-
-p
 	| Lisätietoja löydät
 	a(href="http://freeciv.fi/wiki/", target="_blank") wikistämme
 	|  tai 
@@ -29,6 +20,16 @@ p
 
 hr
 #ilmo
+p
+	| Nyt ilmoittautunut: 
+	b= players
+	b /126
+	|  - vapaana vielä 
+	b= free_players
+	b  
+	b  KPL
+	| !
+
 	form(method='post', action='/ilmo')
 		| Sähköposti:
 		input(name='email')
