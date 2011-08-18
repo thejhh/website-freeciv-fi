@@ -21,7 +21,7 @@ function pg_add_email(email, callback) {
 		if(err) return callback(err);
 		client.query("INSERT INTO "+config.ilmo_table+" (email) values($1)", [email], function(err, result) {
 			if(err) return callback(err);
-			console.log("Added email: %s", email);
+			console.log("Added email: " + email);
 			callback();
 		});
 	});
@@ -35,7 +35,7 @@ function mysql_add_email(email, callback) {
 		[email],
 		function(err) {
 			if(err) return callback(err);
-			util.log("Added email: %s", email);
+			util.log("Added email: " + email);
 			callback();
 		}
 	);
