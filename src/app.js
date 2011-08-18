@@ -41,9 +41,36 @@ function mysql_add_email(email, callback) {
 	);
 }
 
+/* */
 function db_add_email(email, callback) {
 	if(config.mysql) return mysql_add_email(email, callback);
 	if(config.pg) return pg_add_email(email, callback);
+	util.log("Error: No database settings!");
+	callback('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.');
+}
+
+/* */
+function pg_count_emails(callback) {
+}
+
+/* */
+function mysql_count_emails(callback) {
+	var undefined;
+	if(!client) client = mysql.createClient(config.mysql);
+	client.query(
+		'SELECT COUNT(*) AS count FROM '+config.ilmo_table,
+		function(err, results, fields) {
+			if(err) return callback(err);
+			var count = parseInt(results[0].count, 10);
+			callback(undefined, count);
+		}
+	);
+}
+
+/* */
+function db_count_emails(callback) {
+	if(config.mysql) return mysql_count_emails(callback);
+	if(config.pg) return pg_count_emails(callback);
 	util.log("Error: No database settings!");
 	callback('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.');
 }
@@ -83,7 +110,11 @@ app.get('/ilmo/thanks', function(req, res){
 
 app.get('/ilmo', function(req, res){
 	var flash = req.flash();
-	res.render('ilmo', {title: 'Ilmoittautuminen', flash:flash});
+	mysql_count_emails(function(err, players) {
+		if(err) req.flash('error', "Tietokantayhteydessä tapahtui virhe. Sivun tietoja voi olla väärin.");
+		var free_players = 126 - players;
+		res.render('ilmo', {title: 'Ilmoittautuminen', flash:flash, players:players, 'free_players':free_players});
+	});
 });
 
 app.post('/ilmo', function(req, res) {
