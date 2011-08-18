@@ -1,0 +1,21 @@
+Hei,
+
+Osallistuitte muutama vuosi sitten Freeciv-peliimme ja sen johdosta otin nyt 
+uudelleen yhteyttä, sillä olemme aloittamassa uutta peliä.
+
+Uuteen peliin voi ilmoittautua osoitteessa:
+
+	http://game.freeciv.fi/
+
+Freecivin uusin versio on kehittynyt erityisesti pitkiä pelejä varten ja tänä 
+vuonna yksi suuri muutos onkin pelaajien määrä: mukaan voidaan ottaa jopa 126 
+pelaajaa, kun aikaisemmin palvelin tuki vain 30 pelaajaa.
+
+PS: Saitte tämän viestin koska olette aikaisemmin osallistuneet peleihimme tai 
+rekisteröityneet wikiimme. Jos ette halua vastaanottaa tällaisia tiedotteita, 
+voitte joko pyytää minua poistamaan wikitunnuksenne tai käydä itse poistamassa 
+sen palvelussa.
+
+-- 
+Freeciv.fi:n ylläpitäjä,
+Jaakko Heusala <jheusala@freeciv.fi>
