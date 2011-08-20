@@ -1,15 +1,15 @@
-img(src="/images/intro.png", alt="")
-
-h1 Freeciv Syyskuu 2011/I 24h/longturn -ottelu
-
-p Tervetuloa ilmoittautumaan uuteen Freeciv-peliimme.
+p Tervetuloa ilmoittautumaan uuteen Freeciv-peliimme!
 
 p 
-	| Aloitamme pelin kun ilmoittautuneita on 
+	| Aloitamme ottelun kun ilmoittautuneita on 
 	b yli 30
 	|  tai viimeistään 
 	b ma 5.9.2011
-	|  ja jatketaan yksi vuoro päivässä. 
+	| .
+	br
+	| Peli jatkuu sen jälkeen 
+	b yksi vuoro päivässä
+	| .
 
 p
 	| Lisätietoja löydät
@@ -22,33 +22,34 @@ p
 
 hr
 #ilmo
-p
-	| Nyt ilmoittautunut: 
-	b= players
-	b /126
-	|  - vapaana vielä 
-	b= free_players
-	b &nbsp;KPL
-	| !
-
 	form(method='post', action='/ilmo')
-		| Sähköposti:
-		input(name='email')
-		input(type='submit', value='Lähetä')
+		fieldset
+			legend Otteluun ilmoittautuminen
+			| Nyt ilmoittautunut: 
+			b= players
+			b /126
+			|  - vapaana vielä 
+			b= free_players
+			b &nbsp;KPL
+			| !
+			br
+			br
+			label Sähköposti:
+			br
+			input(name='email')
+			br
+			button(type='submit', class='button positive')
+				img(src='/images/blueprint/plugins/buttons/icons/tick.png', alt='')
+				| Lähetä ilmoitus
+
 hr
 - if (flash)
 	- if (flash.error)
-		b Virheitä tapahtui:
-		ul
-			- each msg in flash.error
-				li= msg
+		h4 Virheitä tapahtui:
+		- each msg in flash.error
+			div(class='error')= msg
 		hr
 	- if (flash.info)
-		b Kiitos ilmoituksesta!
-		ul
-			- each msg in flash.info
-				li= msg
-		hr
-p
-	| Powered by 
-	a(href="http://freeciv.fi/wiki/Game.freeciv.fi", target="_blank") game.freeciv.fi
+		h4 Kiitos ilmoituksesta!
+		- each msg in flash.info
+			div(class='info')= msg

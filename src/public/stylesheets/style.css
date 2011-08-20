@@ -1,8 +1,48 @@
+
 body {
-  padding: 50px;
-  font: 14pt "Lucida Grande", Helvetica, Arial, sans-serif;
+	background: #ffffff url(/images/page-top-bg.png) repeat-x;
+	color: #000000;
 }
 
-a {
-  color: #00B7FF;
+.header {
+	background: #000000;
+	height: 300px;
+	width: 100%;
+	font-size: 20pt;
+}
+
+.header img {
+	margin: 0;
+}
+
+.title {
+	background: #570e0e url(/images/page-content-bg.png) repeat-y;
+	font-size: 20px;
+	color: #ffffff;
+	height: 50px;
+	width: 100%;
+}
+
+.title h3 {
+	color: #ffffff;
+	padding: 0 150px 0 150px;
+}
+
+.content {
+	margin: 20px 80px;
+	padding: 10px;
+	font-size: 16pt;
+}
+
+.footer {
+	font-size: 14pt;
+	margin: 20px;
+	text-align: center;
+}
+
+.sponsors {
+	font-size: 14pt;
+	position: absolute;
+	top: 400px;
+	left: 50px;
 }
