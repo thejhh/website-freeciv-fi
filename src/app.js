@@ -116,7 +116,7 @@ app.configure('production', function(){
 // Routes
 
 app.get('/', function(req, res){
-	res.redirect('/ilmo');
+	res.redirect('http://game.freeciv.fi/ilmo');
 });
 
 app.get('/ilmo/thanks', function(req, res){
@@ -147,11 +147,11 @@ app.post('/ilmo', function(req, res) {
 				req.flash('info', 'Sähköpostiosoite lisätty: ' + email);
 				req.flash('info', 'Lähetämme erillisen vahvistuksen vielä ennen pelin aloittamista.');
 			}
-			res.redirect('/ilmo');
+			res.redirect('http://game.freeciv.fi/ilmo');
 		});
 		error = false;
 	}
-	if(error) res.redirect('/ilmo');
+	if(error) res.redirect('http://game.freeciv.fi/ilmo');
 });
 
 app.listen(3000);
