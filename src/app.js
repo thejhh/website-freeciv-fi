@@ -29,16 +29,24 @@ function pg_add_email(email, callback) {
 
 /* */
 function mysql_add_email(email, callback) {
-	if(!client) client = mysql.createClient(config.mysql);
-	client.query(
-		'INSERT INTO '+config.ilmo_table+' SET email = ?',
-		[email],
-		function(err) {
-			if(err) return callback(err);
-			util.log("Added email: " + email);
-			callback();
+	try {
+		if(!client) {
+			util.log("Creating mysql client...");
+			client = mysql.createClient(config.mysql);
 		}
-	);
+		util.log("Executing query for mysql_add_email...");
+		client.query(
+			'INSERT INTO '+config.ilmo_table+' SET email = ?',
+			[email],
+			function(err) {
+				if(err) return callback(err);
+				util.log("Added email: " + email);
+				callback();
+			}
+		);
+	} catch(e) {
+		callback(e);
+	}
 }
 
 /* */
@@ -56,15 +64,23 @@ function pg_count_emails(callback) {
 /* */
 function mysql_count_emails(callback) {
 	var undefined;
-	if(!client) client = mysql.createClient(config.mysql);
-	client.query(
-		'SELECT COUNT(*) AS count FROM '+config.ilmo_table,
-		function(err, results, fields) {
-			if(err) return callback(err);
-			var count = parseInt(results[0].count, 10);
-			callback(undefined, count);
+	try {
+		if(!client) {
+			util.log("Creating mysql client...");
+			client = mysql.createClient(config.mysql);
 		}
-	);
+		util.log("Executing query for mysql_count_emails...");
+		client.query(
+			'SELECT COUNT(*) AS count FROM '+config.ilmo_table,
+			function(err, results, fields) {
+				if(err) return callback(err);
+				var count = parseInt(results[0].count, 10);
+				callback(undefined, count);
+			}
+		);
+	} catch(e) {
+		callback(e);
+	}
 }
 
 /* */
@@ -100,7 +116,7 @@ app.configure('production', function(){
 // Routes
 
 app.get('/', function(req, res){
-	res.redirect('http://game.freeciv.fi/ilmo');
+	res.redirect('/ilmo');
 });
 
 app.get('/ilmo/thanks', function(req, res){
@@ -111,9 +127,9 @@ app.get('/ilmo/thanks', function(req, res){
 app.get('/ilmo', function(req, res){
 	var flash = req.flash();
 	mysql_count_emails(function(err, players) {
-		if(err) req.flash('error', "Tietokantayhteydessä tapahtui virhe. Sivun tietoja voi olla väärin.");
+		if(err) req.flash('error', "Tietokantayhteydessä tapahtui virhe: Sivulla voi olla vääriä tietoja.");
 		var free_players = 126 - players;
-		res.render('ilmo', {title: 'Ilmoittautuminen', flash:flash, players:players, 'free_players':free_players});
+		res.render('ilmo', {title: 'Ilmoittautuminen Freeciv Syyskuu 2011/I -otteluun', flash:flash, players:players, 'free_players':free_players});
 	});
 });
 
@@ -131,11 +147,11 @@ app.post('/ilmo', function(req, res) {
 				req.flash('info', 'Sähköpostiosoite lisätty: ' + email);
 				req.flash('info', 'Lähetämme erillisen vahvistuksen vielä ennen pelin aloittamista.');
 			}
-			res.redirect('http://game.freeciv.fi/ilmo');
+			res.redirect('/ilmo');
 		});
 		error = false;
 	}
-	if(error) res.redirect('http://game.freeciv.fi/ilmo');
+	if(error) res.redirect('/ilmo');
 });
 
 app.listen(3000);
