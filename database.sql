@@ -1,6 +1,6 @@
 /* MySQL database */
 
-/* Open Games */
+/* Games */
 CREATE TABLE `game` (
 	game_id   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	name      VARCHAR(255) NOT NULL DEFAULT '',
@@ -10,11 +10,21 @@ CREATE TABLE `game` (
 	description TEXT DEFAULT '',
 	PRIMARY KEY(game_id)) CHARACTER SET utf8;
 
-/* Registerated emails */
-CREATE TABLE `ilmo` (
-	ilmo_id     BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-	game_id     INT UNSIGNED NOT NULL DEFAULT 0,
+/* Users */
+CREATE TABLE `user` (
+	user_id     BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	email       VARCHAR(255) NOT NULL DEFAULT '',
-	PRIMARY KEY(ilmo_id)) CHARACTER SET utf8;
+	password    VARCHAR(255) NOT NULL DEFAULT '',
+	PRIMARY KEY(user_id)) CHARACTER SET utf8;
+
+/* Players */
+CREATE TABLE `player` (
+	player_id   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	user_id     INT UNSIGNED NOT NULL DEFAULT 0,
+	game_id     INT UNSIGNED NOT NULL DEFAULT 0,
+	name        VARCHAR(255) NOT NULL DEFAULT '',
+	nation      VARCHAR(255) NOT NULL DEFAULT '',
+	UNIQUE KEY `user_game_key` (user_id,game_id),
+	PRIMARY KEY(player_id)) CHARACTER SET utf8;
 
 /* EOF */
