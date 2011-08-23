@@ -6,8 +6,8 @@ CREATE TABLE `game` (
 	name      VARCHAR(255) NOT NULL DEFAULT '',
 	type      VARCHAR(255) NOT NULL DEFAULT '',
 	start_time  TIMESTAMP NOT NULL DEFAULT 0,
-	end_time    TIMESTAMP,
-	description TEXT DEFAULT '',
+	end_time    TIMESTAMP NOT NULL DEFAULT 0,
+	description TEXT NOT NULL DEFAULT '',
 	PRIMARY KEY(game_id)) CHARACTER SET utf8;
 
 /* Users */

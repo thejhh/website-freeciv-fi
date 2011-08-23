@@ -16,7 +16,7 @@ _lib.config = (function(conf) {
 		util.log("sql/mysql.js: Creating mysql client..." );
 		_client = mysql.createClient(conf);
 	}
-	return _client;
+	return _lib;
 });
 
 /* Insert row to table */
@@ -28,15 +28,15 @@ _lib.insert = (function(table, data, callback) {
 			keys.push(k);
 			values.push(v);
 		});
-		query = 'INSERT INTO `'+table+'` SET `' + keys.join('` = ?, ') + '` = ?, ';
+		query = 'INSERT INTO `'+table+'` SET `' + keys.join('` = ?, `') + '` = ?';
 		util.log("Executing query for sql-mysql.js:insert("+sys.inspect(table)+", "+sys.inspect(data)+"): " + query);
 		client.query(
 			query,
 			values,
 			function(err, info) {
 				var undefined;
-				if(err) return callback(err, info.insertId, info);
-				util.log("Added email: " + email);
+				if(err) return callback(err, info && info.insertId, info);
+				//util.log("Added email: " + email);
 				callback(undefined, info.insertId, info);
 			}
 		);
