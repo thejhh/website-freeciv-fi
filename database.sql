@@ -25,6 +25,8 @@ CREATE TABLE `player` (
 	name        VARCHAR(255) NOT NULL DEFAULT '',
 	nation      VARCHAR(255) NOT NULL DEFAULT '',
 	UNIQUE KEY `user_game_key` (user_id,game_id),
+	UNIQUE KEY `game_nation_key` (game_id,nation),
+	UNIQUE KEY `game_name_key` (game_id,name),
 	PRIMARY KEY(player_id)) CHARACTER SET utf8;
 
 /* EOF */
