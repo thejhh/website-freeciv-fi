@@ -30,7 +30,7 @@ _lib.insert = (function(table, data, callback) {
 			values.push(v);
 		});
 		query = 'INSERT INTO `'+table+'` SET `' + keys.join('` = ?, ') + '` = ?, ';
-		util.log("Executing query for mysql-db.js:insert("+sys.inspect(table)+", "+sys.inspect(data)+"): " + query);
+		util.log("Executing query for sql-mysql.js:insert("+sys.inspect(table)+", "+sys.inspect(data)+"): " + query);
 		client.query(
 			query,
 			values,
@@ -46,14 +46,14 @@ _lib.insert = (function(table, data, callback) {
 });
 
 /* Count table rows */
-_lib.count = (function(callback) {
+_lib.count = (function(table, callback) {
 	var undefined;
 	try {
 		var client = _lib.client();
 		if(!client) return callback("!client");
-		util.log("Executing query for db.countUsers()...");
+		util.log("Executing query for sql-mysql.js:count("+sys.inspect(table)+")...");
 		client.query(
-			'SELECT COUNT(*) AS count FROM '+config.user_table,
+			'SELECT COUNT(*) AS count FROM '+table,
 			function(err, results, fields) {
 				if(err) return callback(err);
 				var count = parseInt(results[0].count, 10);
