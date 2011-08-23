@@ -1,6 +1,6 @@
 /* Common interface for relational database */
 
-var _lib = module.exports = require('./sql-mysql.js');
+var _lib = module.exports = require('./mysql.js');
 
 /* Build common interface for accessing data in specific table */
 _lib.table = (function(table) {

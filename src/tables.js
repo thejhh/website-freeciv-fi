@@ -3,13 +3,12 @@
  * Module dependencies.
  */
 
-var sql = require('./sql.js');
-    _lib = module.exports = {},
-    _client;
+var sql = require('./sql'),
+    tables = module.exports = {};
 
 /* Tables */
-_lib.game = sql.table('game');
-_lib.user = sql.table('user');
-_lib.player = sql.table('player');
+tables.game = sql.table('game');
+tables.user = sql.table('user');
+tables.player = sql.table('player');
 
 /* EOF */
