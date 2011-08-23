@@ -3,8 +3,7 @@
  * Module dependencies.
  */
 
-var config = require('./config.js'),
-    util = require('util'),
+var util = require('util'),
     sys = require('sys'),
     foreach = require('snippets').foreach,
     mysql = require('mysql'),
@@ -12,10 +11,10 @@ var config = require('./config.js'),
     _client;
 
 /* */
-_lib.client = (function() {
+_lib.config = (function(conf) {
 	if(!_client) {
-		util.log("Creating mysql client...");
-		_client = mysql.createClient(config.mysql);
+		util.log("sql/mysql.js: Creating mysql client..." );
+		_client = mysql.createClient(conf);
 	}
 	return _client;
 });
@@ -23,7 +22,7 @@ _lib.client = (function() {
 /* Insert row to table */
 _lib.insert = (function(table, data, callback) {
 	try {
-		var client = _lib.client(), keys=[], values=[], query;
+		var client = _client, keys=[], values=[], query;
 		if(!client) return callback("!client");
 		foreach(data).do(function(v, k) {
 			keys.push(k);
@@ -34,10 +33,11 @@ _lib.insert = (function(table, data, callback) {
 		client.query(
 			query,
 			values,
-			function(err) {
-				if(err) return callback(err);
+			function(err, info) {
+				var undefined;
+				if(err) return callback(err, info.insertId, info);
 				util.log("Added email: " + email);
-				callback();
+				callback(undefined, info.insertId, info);
 			}
 		);
 	} catch(e) {
@@ -49,7 +49,7 @@ _lib.insert = (function(table, data, callback) {
 _lib.count = (function(table, callback) {
 	var undefined;
 	try {
-		var client = _lib.client();
+		var client = _client;
 		if(!client) return callback("!client");
 		util.log("Executing query for sql-mysql.js:count("+sys.inspect(table)+")...");
 		client.query(

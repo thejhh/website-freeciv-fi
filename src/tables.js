@@ -3,7 +3,8 @@
  * Module dependencies.
  */
 
-var sql = require('./sql'),
+var config = require('./config.js'),
+    sql = require('./sql').config(config.sql),
     tables = module.exports = {};
 
 /* Tables */
