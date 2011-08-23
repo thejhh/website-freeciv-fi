@@ -6,101 +6,30 @@
 var express = require('express'),
     request = require('request'),
 	config = require('./config.js'),
+	site_url = config.url || 'http://game.freeciv.fi',
     sys = require('sys'),
     util = require('util'),
     trim = require('snippets').trim,
     app = module.exports = express.createServer(),
-    mysql = require('mysql'),
+    tables = require('./tables.js'),
+    couchdb = require('./couchdb.js'),
+    FileStore = require('./FileStore.js')(express),
     client;
-
-/* */
-function pg_add_email(email, callback) {
-	var pg = require('pg'),
-	    conString = config.pg || 'tcp://postgres:1234@localhost/postgres';
-	pg.connect(conString, function(err, client) {
-		if(err) return callback(err);
-		client.query("INSERT INTO "+config.ilmo_table+" (email) values($1)", [email], function(err, result) {
-			if(err) return callback(err);
-			console.log("Added email: " + email);
-			callback();
-		});
-	});
-}
-
-/* */
-function mysql_add_email(email, callback) {
-	try {
-		if(!client) {
-			util.log("Creating mysql client...");
-			client = mysql.createClient(config.mysql);
-		}
-		util.log("Executing query for mysql_add_email...");
-		client.query(
-			'INSERT INTO '+config.ilmo_table+' SET email = ?',
-			[email],
-			function(err) {
-				if(err) return callback(err);
-				util.log("Added email: " + email);
-				callback();
-			}
-		);
-	} catch(e) {
-		callback(e);
-	}
-}
-
-/* */
-function db_add_email(email, callback) {
-	if(config.mysql) return mysql_add_email(email, callback);
-	if(config.pg) return pg_add_email(email, callback);
-	util.log("Error: No database settings!");
-	callback('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.');
-}
-
-/* */
-function pg_count_emails(callback) {
-}
-
-/* */
-function mysql_count_emails(callback) {
-	var undefined;
-	try {
-		if(!client) {
-			util.log("Creating mysql client...");
-			client = mysql.createClient(config.mysql);
-		}
-		util.log("Executing query for mysql_count_emails...");
-		client.query(
-			'SELECT COUNT(*) AS count FROM '+config.ilmo_table,
-			function(err, results, fields) {
-				if(err) return callback(err);
-				var count = parseInt(results[0].count, 10);
-				callback(undefined, count);
-			}
-		);
-	} catch(e) {
-		callback(e);
-	}
-}
-
-/* */
-function db_count_emails(callback) {
-	if(config.mysql) return mysql_count_emails(callback);
-	if(config.pg) return pg_count_emails(callback);
-	util.log("Error: No database settings!");
-	callback('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.');
-}
 
 // Configuration
 
+process.umask(0077);
+
 app.configure(function(){
+	var secret = (config && config.session && config.session.secret) || 'keyboard cat';
+	
 	app.set('views', __dirname + '/views');
 	app.set('view engine', 'jade');
 	
 	app.use(express.logger({ format: ':method :url' }));
 	app.use(express.bodyParser());
 	app.use(express.cookieParser());
-	app.use(express.session({ secret: "keyboard cat" }));
+	app.use(express.session({ 'secret':secret, 'store':new FileStore }));
 	app.use(express.methodOverride());
 	app.use(app.router);
 	app.use(express.static(__dirname + '/public'));
@@ -117,7 +46,7 @@ app.configure('production', function(){
 // Routes
 
 app.get('/', function(req, res){
-	res.redirect('http://game.freeciv.fi/ilmo');
+	res.redirect(site_url+'/ilmo');
 });
 
 app.get('/ilmo/thanks', function(req, res){
@@ -127,7 +56,7 @@ app.get('/ilmo/thanks', function(req, res){
 
 app.get('/ilmo', function(req, res){
 	var flash = req.flash();
-	mysql_count_emails(function(err, players) {
+	tables.user.count(function(err, players) {
 		if(err) req.flash('error', "Tietokantayhteydessä tapahtui virhe: Sivulla voi olla vääriä tietoja.");
 		var free_players = 126 - players;
 		res.render('ilmo', {title: 'Ilmoittautuminen Freeciv Syyskuu 2011/I -otteluun', flash:flash, players:players, 'free_players':free_players});
@@ -140,7 +69,7 @@ app.post('/ilmo', function(req, res) {
 	if(email === "") req.flash('error', "Sähköpostiosoite on tyhjä.");
 	else if(!email.match('@')) req.flash('error', "Sähköpostiosoite ei ole toimiva: " + email);
 	else {
-		db_add_email(email, function(err) {
+		tables.user.insert({'email':email}, function(err) {
 			if(err) {
 				util.log('Error: '+err);
 				req.flash('error', 'Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.');
@@ -148,11 +77,11 @@ app.post('/ilmo', function(req, res) {
 				req.flash('info', 'Sähköpostiosoite lisätty: ' + email);
 				req.flash('info', 'Lähetämme erillisen vahvistuksen vielä ennen pelin aloittamista.');
 			}
-			res.redirect('http://game.freeciv.fi/ilmo');
+			res.redirect(site_url+'/ilmo');
 		});
 		error = false;
 	}
-	if(error) res.redirect('http://game.freeciv.fi/ilmo');
+	if(error) res.redirect(site_url+'/ilmo');
 });
 
 app.listen(3000);

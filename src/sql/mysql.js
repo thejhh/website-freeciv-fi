@@ -43,6 +43,7 @@ _lib.insert = (function(table, data, callback) {
 	} catch(e) {
 		callback(e);
 	}
+	return _lib;
 });
 
 /* Count table rows */
@@ -63,6 +64,7 @@ _lib.count = (function(table, callback) {
 	} catch(e) {
 		callback(e);
 	}
+	return _lib;
 });
 
 /* EOF */
