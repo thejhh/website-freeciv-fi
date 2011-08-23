@@ -20,7 +20,7 @@ module.exports = (function(connect) {
 	
 	FileStore.prototype.get = (function(sid, callback) {
 		try {
-			console.log('Fetching sid = ' + sys.inspect(sid));
+			//console.log('Fetching sid = ' + sys.inspect(sid));
 			fs.readFile(this.session_dir + '/sess-' + sid + '.json', 'UTF-8', function (err, data) {
 				//console.log('Fetched  = ' + sys.inspect(doc));
 				var undefined;
@@ -36,7 +36,7 @@ module.exports = (function(connect) {
 	FileStore.prototype.set = (function(sid, session, callback) {
 		var undefined;
 		try {
-			console.log('Saving sid = ' + sys.inspect(sid) + ', session = ' + sys.inspect(session));
+			//console.log('Saving sid = ' + sys.inspect(sid) + ', session = ' + sys.inspect(session));
 			fs.writeFile(this.session_dir + '/sess-' + sid + '.json', JSON.stringify(session), function (err, res) {
 				if (err) {
 					callback && callback(sys.inspect(err));
