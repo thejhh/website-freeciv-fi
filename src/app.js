@@ -15,6 +15,7 @@ var express = require('express'),
     tables = require('./tables.js'),
     couchdb = require('./couchdb.js'),
     activation = require('./activation.js'),
+    emails = require('./emails.js'),
     FileStore = require('./FileStore.js')(express),
     client;
 
@@ -156,8 +157,15 @@ function createAuthKey(email_key) {
 /* Send authKey using email */
 function sendEmailAuthKey() {
 	return (function(req, res, next) {
-		req.flash('Sähköpostin lähetys epäonnistui.');
-		next();
+		emails.send('./templates/authKey-mail.txt', {'authKey':req.authKey}, {'subject':'Käyttäjätunnuksen vahvistus', 'to':req.email}, function(err) {
+			if(err) {
+				util.log('Error: ' + err);
+				req.flash('error', 'Vahvistusviestin lähetys epäonnistui.');
+			} else {
+				req.flash('info', 'Vahvistusviesti lähetetty onnistuneesti.');
+			}
+			next();
+		});
 	});
 }
 

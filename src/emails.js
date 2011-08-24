@@ -4,7 +4,8 @@
 var nodemailer = require('nodemailer'),
     config = require('./config.js'),
     foreach = require('snippets').foreach,
-    fs = require('filesystem'),
+    fs = require('fs'),
+    sys = require('sys'),
 	util = require('util'),
     _lib = module.exports = {};
 
@@ -13,11 +14,13 @@ nodemailer.SMTP = config.smtp || {};
 
 /* Render mail body */
 function render_file(file, context, callback) {
-	fs.readFileSync(file, 'utf-8', function(err, data) {
+	util.log('Reading email from file...');
+	fs.readFile(file, 'utf-8', function(err, data) {
+		util.log('Rendering email...');
 		var undefined;
 		if(err) return callback(err, data);
 		foreach(context).do(function(v, k) {
-			data.replace('{'+k+'}', urlencode(v));
+			data = data.replace('{'+k+'}', encodeURIComponent(v));
 		});
 		callback(undefined, data);
 	});
@@ -25,11 +28,14 @@ function render_file(file, context, callback) {
 
 /* Send email */
 _lib.send = (function(file, context, options, callback) {
+	util.log('Sending email...');
 	options = options || {};
 	if(!options.to) return callback("Missing: to");
 	if(!options.subject) return callback('Missing: subject');
-	if(!options.sender) options.sender = config.sender || 'Freeciv.fi <freeciv@freeciv.fi>',
+	if(!options.sender) options.sender = config.sender || 'Freeciv Fi <freeciv@freeciv.fi>',
 	render_file(file, context, function(err, data) {
+		if(err) return callback(err);
+		util.log('Sending rendered file...');
 		util.log("Mailing with headers '" + sys.inspect(options) + "'");
 		options.body = data;
 		nodemailer.send_mail(options,
