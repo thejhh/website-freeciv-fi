@@ -46,6 +46,31 @@ _lib.insert = (function(table, data, callback) {
 	return _lib;
 });
 
+/* Select row(s) from table */
+_lib.select = (function(table, where, callback) {
+	try {
+		var client = _client, keys=[], values=[], query;
+		if(!client) return callback("!client");
+		foreach(where).do(function(v, k) {
+			keys.push(k);
+			values.push(v);
+		});
+		query = 'SELECT * FROM `'+table+'`';
+		if(keys.length !== 0) query += ' WHERE `' + keys.join('` = ?, `') + '` = ?';
+		util.log("Executing query for sql-mysql.js:select("+sys.inspect(table)+", "+sys.inspect(where)+"): " + query);
+		client.query(
+			query,
+			values,
+			function(err, results, fields) {
+				return callback(err, results, fields);
+			}
+		);
+	} catch(e) {
+		callback(e);
+	}
+	return _lib;
+});
+
 /* Count table rows */
 _lib.count = (function(table, callback) {
 	var undefined;

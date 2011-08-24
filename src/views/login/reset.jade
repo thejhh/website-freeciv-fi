@@ -1,0 +1,12 @@
+#act
+	form(method='post')
+		fieldset
+			legend Salasanan vaihtaminen
+			label Sähköposti:
+			br
+			input(name='email', value=param('email'))
+			br
+			button(type='submit', class='button positive')
+				img(src='/images/blueprint/plugins/buttons/icons/tick.png', alt='')
+				| Lähetä pyyntö
+			hr

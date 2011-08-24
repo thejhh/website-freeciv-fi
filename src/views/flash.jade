@@ -1,0 +1,10 @@
+- if (flash && (flash.error || flash.info) )
+	div(class='flash')
+		- if (flash.error)
+			h4 Virheitä tapahtui:
+			- each msg in flash.error
+				div(class='error')= msg
+		- if (flash.info)
+			h4 Huomaa:
+			- each msg in flash.info
+				div(class='info')= msg

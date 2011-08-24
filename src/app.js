@@ -48,95 +48,162 @@ app.configure('production', function(){
 	app.use(express.errorHandler()); 
 });
 
-// Routes
-
-app.get('/', function(req, res){
-	res.redirect(site_url+'/ilmo');
-});
-
-app.post('/loginreset', function(req, res){
-	var email = trim(""+req.body.email),
-	    error = true;
-	if(email === "") req.flash('error', "Sähköpostiosoite on tyhjä.");
-	else if(!email.match('@')) req.flash('error', "Sähköpostiosoite ei ole toimiva: " + email);
-	else {
-		
-		var user_id;
-		
-		activation.create({'user_id':user_id}, function(err, key) {
-			if(err) {
-				req.flash('error', 'Tapahtui virhe. Yritä hetken kuluttua uudelleen.');
-			} else {
-				console.log('Activation created with key: ' + key);
-				// Send mail
-			}
+// Helpers
+app.dynamicHelpers({
+	session: function(req, res){
+		return req.session;
+	},
+	flash: function(req, res) {
+		return req.flash();
+	},
+	param: function(req, res){
+		return (function(key, def) {
+			return req.param(key, def);
 		});
-		
-		error = false;
-	}
-	if(error) res.redirect(site_url+'/loginreset');
+	},
 });
 
-app.get('/loginreset', function(req, res){
-	var flash = req.flash();
-	res.render('loginreset', {'title': 'Salasanan vaihtaminen', 'email':'', 'flash':flash });
-});
-
-app.get('/login', function(req, res){
-	var flash = req.flash();
-	res.render('login', {title: 'Sisäänkirjautuminen', flash:flash });
-});
-
-/*
-app.post('/act/:key', function(req, res){
-	var flash = req.flash(),
-	    key = req.params.key;
-	
-	activation.test(key, function(err, data) {
-		if(err) return do_error(err);
-		console.log('Received data: ' + sys.inspect(data));
-		activation.remove(key, function(err, data) {
-			if(err) return do_error(err);
-			console.log('Removed key ' + key);
-			process.exit(0);
-		});
-	});
-	
-	res.render('act', {title: 'Tietojen aktivoiminen', flash:flash});
-});
-*/
-
-app.param('key', String);
-
-app.get('/act/:key', function(req, res){
-	var flash = req.flash(),
-	    key = ""+req.params.key;
-	activation.test(key, function(err, data) {
-		if(err) {
-			req.flash('error', 'Virheellinen aktivointiavain');
-			res.render('error', {title: 'Tietojen aktivoiminen', flash:flash});
-		} else {
-			if(data) console.log('Received data: ' + sys.inspect(data));
-			res.render('act', {title: 'Tietojen aktivoiminen', key:key, flash:flash});
+/* Markdown view engine
+app.register('.md', {
+	compile: function(str, options){
+		var html = md.toHTML(str);
+		return function(locals){
+			return html.replace(/\{([^}]+)\}/g, function(_, name){
+				return locals[name];
+			});
 		}
 	});
+*/
+
+// Params
+
+/* Authentication Key for acquiring lost login information */
+app.param('authKey', function(req, res, next, id){
+	var key = ""+req.params.authKey;
+	activation.test(key, function(err, data) {
+		if(err) return next('Virheellinen aktivointiavain');
+		req.authKey = key;
+		next();
+	});
 });
 
-app.get('/ilmo/thanks', function(req, res){
-	var flash = req.flash();
-	res.render('thanks', {title: 'Ilmoitus vastaanotettu', email:email, flash:flash });
+/* Game Tag */
+app.param('gameTag', function(req, res, next, id){
+	var game_tag = ""+req.params.gameTag;
+	tables.game.select({'tag':game_tag}, function(err, data) {
+		if(err) return next('Virhe tietokantayhteydessä. Kokeile hetken kuluttua uudelleen.');
+		if(!data[0]) return next('Virheellinen pelin tunniste');
+		req.game_id = data[0].game_id;
+		req.game = data[0];
+		next();
+	});
+});
+
+/* Game Id */
+app.param('gameId', function(req, res, next, id){
+	var game_id = parseInt(""+req.params.gameId, 10);
+	tables.game.select({'game_id':game_id}, function(err, data) {
+		if(err) return next('Virhe tietokantayhteydessä. Kokeile hetken kuluttua uudelleen.');
+		if(!data[0]) return next('Virheellinen pelin tunniste');
+		req.game_id = game_id;
+		req.game = data;
+		next();
+	});
+});
+
+// Routes
+
+/* Root route */
+app.get('/', function(req, res){
+	res.redirect(site_url+'/game');
 });
 
 app.get('/ilmo', function(req, res){
-	var flash = req.flash();
+	res.redirect(site_url+'/game/2011-I');
+});
+
+/* Validate and prepare email keyword */
+function prepBodyEmail(key) {
+	var key = key || 'email';
+	return (function(req, res, next) {
+		function on_error(msg) {
+			req.flash('error', "Sähköpostiosoite on virheellinen");
+			res.redirect('back');
+		}
+		if(!req.body[key]) return on_error("Osoite puuttuu");
+		var email = trim(""+req.body[key]);
+		if(email.length === 0) return on_error("Osoite on tyhjä");
+		if(!email.match('@')) return on_error("Ei ole toimiva: " + email);
+		req[key] = email;
+		next();
+	});
+}
+
+/* Create authKey */
+function createAuthKey(email_key) {
+	var email_key = email_key || 'email';
+	return (function(req, res, next) {
+		var email = req[email_key],
+		    user_id = req.user_id;
+		activation.create({'user_id':user_id}, function(err, key) {
+			if(err) return next(err);
+			req.authKey = key;
+			next();
+		});
+	});
+}
+
+/* Send authKey using email */
+function sendEmailAuthKey() {
+	return (function(req, res, next) {
+		req.flash('Sähköpostin lähetys epäonnistui.');
+		next();
+	});
+}
+
+/* Handle requests for authKey */
+app.post('/login/reset', prepBodyEmail(), createAuthKey(), sendEmailAuthKey(), function(req, res){
+	res.render('login/reset', {'title': 'Salasanan vaihtaminen'});
+});
+
+/* Display login reset page */
+app.get('/login/reset', function(req, res){
+	res.render('login/reset', {'title': 'Salasanan vaihtaminen'});
+});
+
+/* Display login page */
+app.get('/login', function(req, res){
+	res.render('login/index', {title: 'Sisäänkirjautuminen' });
+});
+
+/* Ask validation from user for authKey */
+app.get('/act/:authKey', function(req, res){
+	var key = ""+req.params.authKey;
+	res.render('act', {title: 'Tietojen aktivoiminen', key:key});
+});
+
+/* Game page */
+app.get('/game', function(req, res){
+	var latest_game = '2011-I';
+	res.redirect(site_url+'/game/'+latest_game+'/index');
+});
+
+/* Game page */
+app.get('/game/:gameTag', function(req, res){
+	res.redirect(site_url+'/game/'+req.game.tag+'/index');
+});
+
+/* Game page */
+app.get('/game/:gameTag/index', function(req, res){
 	tables.user.count(function(err, players) {
 		if(err) req.flash('error', "Tietokantayhteydessä tapahtui virhe: Sivulla voi olla vääriä tietoja.");
 		var free_players = 126 - players;
-		res.render('ilmo', {title: 'Freeciv.fi Syyskuu 2011/I', flash:flash, players:players, 'free_players':free_players});
+		res.render('reg', {title: 'Freeciv.fi Syyskuu 2011/I', players:players, 'free_players':free_players});
 	});
 });
 
-app.post('/ilmo', function(req, res) {
+/* Handle registration request */
+app.post('/game/:gameTag/reg', function(req, res) {
 	var email = trim(""+req.body.email),
 	    error = true;
 	if(email === "") req.flash('error', "Sähköpostiosoite on tyhjä.");
@@ -150,22 +217,13 @@ app.post('/ilmo', function(req, res) {
 				req.flash('info', 'Sähköpostiosoite lisätty: ' + email);
 				req.flash('info', 'Lähetämme erillisen vahvistuksen vielä ennen pelin aloittamista.');
 			}
-			res.redirect(site_url+'/ilmo');
+			res.redirect(site_url+'/reg');
 		});
 		error = false;
 	}
-	if(error) res.redirect(site_url+'/ilmo');
+	if(error) res.redirect(site_url+'/reg');
 });
 
+/* Set port to listen */
 app.listen(3000);
-
-/*
-io.sockets.on('connection', function (socket) {
-	socket.emit('news', { hello: 'world' });
-	socket.on('my other event', function (data) {
-		console.log(data);
-	});
-});
-*/
-
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);

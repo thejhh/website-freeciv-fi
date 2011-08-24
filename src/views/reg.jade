@@ -24,7 +24,7 @@ p
 
 hr
 #ilmo
-	form(method='post', action='/ilmo')
+	form(method='post', action='reg')
 		fieldset
 			legend Otteluun ilmoittautuminen
 			| Nyt ilmoittautunut: 
@@ -58,3 +58,9 @@ hr
 		h4 Kiitos ilmoituksesta!
 		- each msg in flash.info
 			div(class='info')= msg
+div(class='sponsors')
+	hr
+	| Yhteistyössä mukana: 
+	br
+	a(href="http://www.v2.fi", target="_blank")
+		img(src="/images/logot/v2-logo-125.png", alt="V2.fi", width="174", height="125")
