@@ -19,10 +19,15 @@ html
 			})();
 	body
 		div(class='container')
+			div(class='links')
+				| [ 
+				a(href='/login') sisäänkirjautuminen
+				|  ]
 			div(class='header')
-				img(src="/images/intro-page.png", alt="")
+				a(href='/')
+					img(src="/images/intro-page.png", alt="")
 			div(class='title')
-				h3 Freeciv.fi Syyskuu 2011/I
+				h3= title
 			div(class='content')!= body
 			div(class='sponsors')
 				| Yhteistyössä mukana: 

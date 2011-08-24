@@ -1,0 +1,23 @@
+hr
+#act
+	form(method='post', action='/login')
+		fieldset
+			legend Salasanan vaihtaminen
+			label Sähköposti:
+			br
+			input(name='email', value=email)
+			br
+			button(type='submit', class='button positive')
+				img(src='/images/blueprint/plugins/buttons/icons/tick.png', alt='')
+				| Lähetä pyyntö
+			hr
+			- if (flash)
+				- if (flash.error)
+					h4 Virheitä tapahtui:
+					- each msg in flash.error
+						div(class='error')= msg
+					hr
+				- if (flash.info)
+					h4 Huomaa:
+					- each msg in flash.info
+						div(class='info')= msg

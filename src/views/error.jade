@@ -1,0 +1,11 @@
+hr
+- if (flash)
+	- if (flash.error)
+		h4 Virheitä tapahtui:
+		- each msg in flash.error
+			div(class='error')= msg
+		hr
+	- if (flash.info)
+		h4 Huomaa:
+		- each msg in flash.info
+			div(class='info')= msg

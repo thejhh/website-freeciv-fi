@@ -5,6 +5,8 @@
   , "dependencies": {
       "express": "2.4.3"
     , "request": ">= 2.0.0"
+    , "express-params": "*"
+    , "express-messages": "*"
     , "jade": ">= 0.0.1"
     , "snippets": ">= 0.0.5"
     , "pg": "*"

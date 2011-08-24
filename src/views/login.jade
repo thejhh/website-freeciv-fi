@@ -1,0 +1,29 @@
+hr
+#act
+	form(method='post', action='/login')
+		fieldset
+			legend Sisäänkirjautuminen
+			label Sähköposti:
+			br
+			input(name='email')
+			br
+			label Salasana:
+			br
+			input(type='password', name='password1', value='')
+			br
+			br
+			button(type='submit', class='button positive')
+				img(src='/images/blueprint/plugins/buttons/icons/tick.png', alt='')
+				| Kirjaudu sisälle
+			a(href='/loginreset', class='button') Salasana hukassa?
+			- if (flash)
+				- if (flash.error)
+					hr
+					h4 Virheitä tapahtui:
+					- each msg in flash.error
+						div(class='error')= msg
+				- if (flash.info)
+					hr
+					h4 Huomaa:
+					- each msg in flash.info
+						div(class='info')= msg
