@@ -83,15 +83,25 @@ app.param('authKey', function(req, res, next, id){
 	var key = ""+req.params.authKey;
 	activation.test(key, function(err, data) {
 		if(err) return next('Virheellinen aktivointiavain');
-		req.authKey = key;
-		next();
+		console.log('authKeyData = ' + sys.inspect(data));
+		if(!data.user_id) return next('Virheellinen aktivointidata: user_id puuttuu');
+		tables.user.select().where({'user_id':data.user_id}).limit(1).do(function(err, rows) {
+			if(err) return next('Virheellinen aktivointidata: tietokantavirhe');
+			if(!rows[0]) return next('Virheellinen aktivointidata: user rivi puuttuu');
+			req.authKey = key;
+			req.authKeyData = data;
+			req.user = rows[0];
+			req.user_id = data.user_id;
+			req.email = req.user['email'];
+			next();
+		});
 	});
 });
 
 /* Game Tag */
 app.param('gameTag', function(req, res, next, id){
 	var game_tag = ""+req.params.gameTag;
-	tables.game.select({'tag':game_tag}, function(err, data) {
+	tables.game.select().where({'tag':game_tag}).limit(1).do(function(err, data) {
 		if(err) return next('Virhe tietokantayhteydessä. Kokeile hetken kuluttua uudelleen.');
 		if(!data[0]) return next('Virheellinen pelin tunniste');
 		req.game_id = data[0].game_id;
@@ -103,7 +113,7 @@ app.param('gameTag', function(req, res, next, id){
 /* Game Id */
 app.param('gameId', function(req, res, next, id){
 	var game_id = parseInt(""+req.params.gameId, 10);
-	tables.game.select({'game_id':game_id}, function(err, data) {
+	tables.game.select().where({'game_id':game_id}).limit(1).do(function(err, data) {
 		if(err) return next('Virhe tietokantayhteydessä. Kokeile hetken kuluttua uudelleen.');
 		if(!data[0]) return next('Virheellinen pelin tunniste');
 		req.game_id = game_id;
@@ -140,12 +150,91 @@ function prepBodyEmail(key) {
 	});
 }
 
+/* Validate and prepare password keywords */
+function prepBodyPasswords(key1, key2) {
+	var key1 = key1 || 'password',
+	    key2 = key2 || 'password2';
+	return (function(req, res, next) {
+		function on_error(msg) {
+			req.flash('error', "Salasanat ovat virheellisiä: "+msg);
+			res.redirect('back');
+		}
+		if(!(req.body[key1] && req.body[key2])) return on_error("Toinen salasanoista puuttuu");
+		var pw1 = ""+req.body[key1];
+		var pw2 = ""+req.body[key2];
+		if(pw1.length < 8) return on_error("Salasanan tulee olla vähintään kahdeksan (8) merkkiä pitkä");
+		if(pw1 !== pw2) return on_error("Salasanat eivät vastaa toisiaan");
+		req[key1] = pw1;
+		next();
+	});
+}
+
+/* Validate and prepare data by keyword */
+function prepSQLRowBy(table, key) {
+	var table = table || 'user',
+	    key = key || table+"_id";
+	return (function(req, res, next) {
+		function on_error(msg) {
+			req.flash('error', "Virhe tietokannan lukemisessa");
+			res.redirect('back');
+		}
+		
+		if(!req[key]) return next("request has no key: " + key);
+		
+		var where = {};
+		where[key] = req[key];
+		
+		tables[table].select().where(where).limit(1).do(function(err, data) {
+			if(err) return next('Virhe tietokantayhteydessä. Kokeile hetken kuluttua uudelleen.');
+			var row = data.shift();
+			if(!row) return next('Tietoja ei löytynyt tietokannasta');
+			req[table+"_id"] = row[table+"_id"];
+			req[table] = row;
+			next();
+		});
+	});
+}
+
+/* Update SQL rows */
+function updateSQLRow(table, keys) {
+	var table = table,
+	    keys = keys;
+	return (function(req, res, next) {
+		if(!table) return next('table missing');
+		if(!keys) return next('keys missing');
+		
+		function on_error(msg) {
+			req.flash('error', "Virhe tietokannan lukemisessa");
+			res.redirect('back');
+		}
+		
+		if(!req[key]) return next("request has no key: " + key);
+		
+		var where = {},
+		    what = {}, 
+		    id_key = table+"_id";
+		where[id_key] = req[id_key];
+		
+		foreach(keys).do(function(k) {
+			what[k] = req[k];
+		});
+		
+		if(!tables[table]) return next('table missing: ' + table);
+		
+		tables[table].update(what).where(where).do(function(err) {
+			if(err) return next('Virhe tietokantayhteydessä. Kokeile hetken kuluttua uudelleen.');
+			next();
+		});
+	});
+}
+
 /* Create authKey */
 function createAuthKey(email_key) {
 	var email_key = email_key || 'email';
 	return (function(req, res, next) {
 		var email = req[email_key],
 		    user_id = req.user_id;
+		if(!user_id) return next("user_id puuttuu");
 		activation.create({'user_id':user_id}, function(err, key) {
 			if(err) return next(err);
 			req.authKey = key;
@@ -157,7 +246,8 @@ function createAuthKey(email_key) {
 /* Send authKey using email */
 function sendEmailAuthKey() {
 	return (function(req, res, next) {
-		emails.send('./templates/authKey-mail.txt', {'authKey':req.authKey}, {'subject':'Käyttäjätunnuksen vahvistus', 'to':req.email}, function(err) {
+		emails.send('./templates/authKey-mail.txt', {'authKey':req.authKey, 'site':site_url},
+				{'subject':'Käyttäjätunnuksen vahvistus', 'to':req.email}, function(err) {
 			if(err) {
 				util.log('Error: ' + err);
 				req.flash('error', 'Vahvistusviestin lähetys epäonnistui.');
@@ -170,8 +260,8 @@ function sendEmailAuthKey() {
 }
 
 /* Handle requests for authKey */
-app.post('/login/reset', prepBodyEmail(), createAuthKey(), sendEmailAuthKey(), function(req, res){
-	res.render('login/reset', {'title': 'Salasanan vaihtaminen'});
+app.post('/login/reset', prepBodyEmail(), prepSQLRowBy('user', 'email'), createAuthKey(), sendEmailAuthKey(), function(req, res){
+	res,redirect('back');
 });
 
 /* Display login reset page */
@@ -185,9 +275,13 @@ app.get('/login', function(req, res){
 });
 
 /* Ask validation from user for authKey */
+app.post('/act/:authKey', prepBodyPasswords(), updateSQLRow('user', ['password']), function(req, res){
+	res.redirect('back');
+});
+
+/* Ask validation from user for authKey */
 app.get('/act/:authKey', function(req, res){
-	var key = ""+req.params.authKey;
-	res.render('act', {title: 'Tietojen aktivoiminen', key:key});
+	res.render('act/index.jade', {title: 'Tietojen aktivoiminen', 'authKey':req.authKey, 'email':req.email});
 });
 
 /* Game page */

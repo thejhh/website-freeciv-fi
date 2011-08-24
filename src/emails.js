@@ -20,7 +20,9 @@ function render_file(file, context, callback) {
 		var undefined;
 		if(err) return callback(err, data);
 		foreach(context).do(function(v, k) {
-			data = data.replace('{'+k+'}', encodeURIComponent(v));
+			data = data.replace('{'+k+'\|s}', v);
+			data = data.replace('{'+k+'\|u}', encodeURI(v));
+			data = data.replace('{'+k+'\|uc}', encodeURIComponent(v));
 		});
 		callback(undefined, data);
 	});

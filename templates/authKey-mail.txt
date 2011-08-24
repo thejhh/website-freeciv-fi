@@ -4,7 +4,7 @@ Tämä on vahvistuspyyntö ilmoittautumisesta seuraavaan Freeciv-peliimme.
 
 Voitte vahvistaa osallistumisenne helposti osoitteessa:
 
-	http://game.freeciv.fi/act/{authKey}
+	{site|s}/act/{authKey|uc}
 
 Teillä on aikaa vahvistaa osallistuminen kolme päivää tämän viestin 
 päiväyksestä kuluen.

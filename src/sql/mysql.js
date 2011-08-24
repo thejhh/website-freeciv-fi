@@ -22,7 +22,7 @@ _lib.config = (function(conf) {
 /* Insert row to table */
 _lib.insert = (function(table, data, callback) {
 	try {
-		var client = _client, keys=[], values=[], query;
+		var client = _client, where_keys=[], values=[], query;
 		if(!client) return callback("!client");
 		foreach(data).do(function(v, k) {
 			keys.push(k);
@@ -47,22 +47,67 @@ _lib.insert = (function(table, data, callback) {
 });
 
 /* Select row(s) from table */
-_lib.select = (function(table, where, callback) {
+_lib.select = (function(table, options, callback) {
 	try {
-		var client = _client, keys=[], values=[], query;
+		var client = _client,
+		    keys=[],
+		    values=[],
+		    options = options || {},
+			where = options.where || {},
+			limit = options.limit,
+		    query;
 		if(!client) return callback("!client");
-		foreach(where).do(function(v, k) {
+		foreach(options.where).do(function(v, k) {
 			keys.push(k);
 			values.push(v);
 		});
 		query = 'SELECT * FROM `'+table+'`';
 		if(keys.length !== 0) query += ' WHERE `' + keys.join('` = ?, `') + '` = ?';
-		util.log("Executing query for sql-mysql.js:select("+sys.inspect(table)+", "+sys.inspect(where)+"): " + query);
+		if(limit) query += ' LIMIT ' + limit;
+		util.log("Executing query for sql-mysql.js:select("+sys.inspect(table)+", "+sys.inspect(options.where)+"): " + query);
 		client.query(
 			query,
 			values,
 			function(err, results, fields) {
 				return callback(err, results, fields);
+			}
+		);
+	} catch(e) {
+		callback(e);
+	}
+	return _lib;
+});
+
+/* Update row(s) from table */
+_lib.update = (function(table, options, callback) {
+	try {
+		var client = _client,
+		    options = options || {},
+			where = options.where || {},
+			what = options.what || {},
+			limit = options.limit,
+		    keys = [],
+		    what_keys = [],
+		    values = [],
+		    query;
+		if(!client) return callback("!client");
+		foreach(what).do(function(v, k) {
+			what_keys.push(k);
+			values.push(v);
+		});
+		foreach(where).do(function(v, k) {
+			where_keys.push(k);
+			values.push(v);
+		});
+		query = 'UPDATE `'+table+'` SET `'+ what_keys.join('` = ?, `') + '` = ?';
+		if(where_keys.length !== 0) query += ' WHERE `' + where_keys.join('` = ?, `') + '` = ?';
+		if(limit) query += ' LIMIT ' + limit;
+		util.log("Executing query for sql-mysql.js:update("+sys.inspect(table)+", "+sys.inspect(where)+"): " + query);
+		client.query(
+			query,
+			values,
+			function(err, a, b) {
+				return callback(err, a, b);
 			}
 		);
 	} catch(e) {

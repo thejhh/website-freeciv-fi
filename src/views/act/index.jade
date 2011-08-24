@@ -1,15 +1,14 @@
-hr
 #act
-	form(method='post', action='/act/'+key)
+	form(method='post', action='/act/'+authKey)
 		fieldset
 			legend Salasanan asettaminen
 			br
-			label Sähköposti:
+			label Sähköposti: 
 			= email
 			br
 			label Salasana:
 			br
-			input(type='password', name='password1', value='')
+			input(type='password', name='password', value='')
 			br
 			label Salasana (uudelleen):
 			br
@@ -19,17 +18,6 @@ hr
 			button(type='submit', class='button positive')
 				img(src='/images/blueprint/plugins/buttons/icons/tick.png', alt='')
 				| Vahvista
-			a(href='#', class='button negative')
+			a(href='/', class='button negative')
 				img(src='/images/blueprint/plugins/buttons/icons/cross.png', alt='')
 				| Peruuta
-hr
-- if (flash)
-	- if (flash.error)
-		h4 Virheitä tapahtui:
-		- each msg in flash.error
-			div(class='error')= msg
-		hr
-	- if (flash.info)
-		h4 Huomaa:
-		- each msg in flash.info
-			div(class='info')= msg
