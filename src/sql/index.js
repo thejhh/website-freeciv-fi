@@ -1,6 +1,7 @@
 /* Common interface for relational database */
 
-var _lib = module.exports = require('./mysql.js');
+var sys = require('sys'),
+    _lib = module.exports = require('./mysql.js');
 
 /* Build common interface for accessing data in specific table */
 _lib.table = (function(table) {
@@ -19,6 +20,7 @@ _lib.table = (function(table) {
 				return this;
 			},
 			'do':function(callback) {
+				console.log('Selecting from %s table with %s', table, sys.inspect(options));
 				return _lib.select(table, options, callback);
 			}
 		});
@@ -42,11 +44,13 @@ _lib.table = (function(table) {
 				return this;
 			},
 			'do':function(callback) {
+				console.log('Updating table %s with %s', table, sys.inspect(options));
 				return _lib.update(table, options, callback);
 			}
 		});
 	}); // Select rows
 	obj.count = (function(callback) { return _lib.count(table, callback); }); // Count table rows
+	obj.authcheck = (function(options, callback) { return _lib.authcheck(table, options, callback); }); // Count table rows
 	return obj;
 });
 

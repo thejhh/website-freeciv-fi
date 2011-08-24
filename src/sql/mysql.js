@@ -7,6 +7,7 @@ var util = require('util'),
     sys = require('sys'),
     foreach = require('snippets').foreach,
     mysql = require('mysql'),
+	_rand = require('../rand.js'),
     _lib = module.exports = {},
     _client;
 
@@ -22,13 +23,19 @@ _lib.config = (function(conf) {
 /* Insert row to table */
 _lib.insert = (function(table, data, callback) {
 	try {
-		var client = _client, where_keys=[], values=[], query;
+		var client = _client, keys=[], values=[], query;
 		if(!client) return callback("!client");
 		foreach(data).do(function(v, k) {
-			keys.push(k);
-			values.push(v);
+			if((k === 'password') && (v!='') ) {
+				keys.push("`"+k+"` = ENCRYPT(?, ?)");
+				values.push(v);
+				values.push('$6$' + _rand.string(16) + '$');
+			} else {
+				keys.push("`"+k+"` = ?");
+				values.push(v);
+			}
 		});
-		query = 'INSERT INTO `'+table+'` SET `' + keys.join('` = ?, `') + '` = ?';
+		query = 'INSERT INTO `'+table+'` SET ' + keys.join(', ');
 		util.log("Executing query for sql-mysql.js:insert("+sys.inspect(table)+", "+sys.inspect(data)+"): " + query);
 		client.query(
 			query,
@@ -86,31 +93,43 @@ _lib.update = (function(table, options, callback) {
 			where = options.where || {},
 			what = options.what || {},
 			limit = options.limit,
-		    keys = [],
+		    where_keys = [],
 		    what_keys = [],
 		    values = [],
 		    query;
+		util.log("Updating at sql/mysql.js...");
 		if(!client) return callback("!client");
+		util.log("Foreach what...");
 		foreach(what).do(function(v, k) {
-			what_keys.push(k);
-			values.push(v);
+			if((k === 'password') && (v!='') ) {
+				what_keys.push("`"+k+"` = ENCRYPT(?, ?)");
+				values.push(v);
+				values.push('$6$' + _rand.string(16) + '$');
+			} else {
+				what_keys.push("`"+k+"` = ?");
+				values.push(v);
+			}
 		});
+		util.log("Foreach where...");
 		foreach(where).do(function(v, k) {
 			where_keys.push(k);
 			values.push(v);
 		});
-		query = 'UPDATE `'+table+'` SET `'+ what_keys.join('` = ?, `') + '` = ?';
+		util.log("Building query...");
+		query = 'UPDATE `'+table+'` SET '+ what_keys.join(', ');
 		if(where_keys.length !== 0) query += ' WHERE `' + where_keys.join('` = ?, `') + '` = ?';
 		if(limit) query += ' LIMIT ' + limit;
 		util.log("Executing query for sql-mysql.js:update("+sys.inspect(table)+", "+sys.inspect(where)+"): " + query);
 		client.query(
 			query,
 			values,
-			function(err, a, b) {
-				return callback(err, a, b);
+			function(err) {
+				util.log("Query done with err = " + sys.inspect(err) );
+				callback(err);
 			}
 		);
 	} catch(e) {
+		util.log("Exception catched with " + sys.inspect(e) );
 		callback(e);
 	}
 	return _lib;
@@ -135,6 +154,35 @@ _lib.count = (function(table, callback) {
 		callback(e);
 	}
 	return _lib;
+});
+
+/* Auth check */
+_lib.authcheck = (function(table, options, callback) {
+	try {
+		var client = _client;
+		if(!client) return callback("!client");
+		var email = options.email,
+		    password = options.password,
+		    query;
+		if(!email) return callback("missing: email");
+		if(!password) return callback("missing: password");
+		query = 'SELECT COUNT(*) AS count FROM '+table+' WHERE email = ? AND password=ENCRYPT(?, password) LIMIT 1';
+		util.log("Executing query for sql-mysql.js:authcheck("+sys.inspect(table)+"): " + sys.inspect(query) );
+		client.query(
+			query,
+			[email, password],
+			function(err, results, fields) {
+				var undefined, count;
+				if(err) return callback("authcheck: "+err);
+				if(!results[0]) return callback("authcheck: results missing");
+				if(results[0].count) count = parseInt(results[0].count, 10);
+				util.log("count = " + count);
+				callback(undefined, (count === 1 ? true : false) );
+			}
+		);
+	} catch(e) {
+		callback("exception: " + e);
+	}
 });
 
 /* EOF */

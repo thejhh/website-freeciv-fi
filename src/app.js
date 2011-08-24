@@ -10,6 +10,7 @@ var express = require('express'),
 	site_url = config.url || 'http://game.freeciv.fi',
     sys = require('sys'),
     util = require('util'),
+    foreach = require('snippets').foreach,
     trim = require('snippets').trim,
     app = module.exports = express.createServer(),
     tables = require('./tables.js'),
@@ -133,6 +134,49 @@ app.get('/ilmo', function(req, res){
 	res.redirect(site_url+'/game/2011-I');
 });
 
+/* Validate and prepare login */
+function prepLoginAuth() {
+	util.log('start of prepLoginAuth()');
+	return (function(req, res, next) {
+		util.log('call to prepLoginAuth() instance');
+		function on_error(msg) {
+			req.flash('error', "Kirjautuminen epäonnistui");
+			res.redirect('back');
+		}
+		if(!req.body["email"]) return on_error("missing email");
+		if(!req.body["password"]) return on_error("missing password");
+		var email = ""+req.body.email,
+		    password = ""+req.body.password;
+		util.log('Checking auth for email = ' + sys.inspect(email));
+		tables.user.authcheck({'email':email, 'password':password}, function(err, valid) {
+			if(err) return on_error('Kirjautuminen epäonnistui');
+			if(!valid) return on_error('Kirjautuminen epäonnistui');
+			util.log('Fetching user data for email = ' + sys.inspect(email));
+			tables.user.select().where({'email':email}).limit(1).do(function(err, data) {
+				if(err) return on_error('Kirjautuminen epäonnistui');
+				if(!data[0]) return on_error('Kirjautuminen epäonnistui');
+				delete data[0].password;
+				req.session.user = data[0];
+				util.log('User logged in as ' + sys.inspect(req.session.user));
+				req.flash('info', 'Sisäänkirjautuminen onnistui.');
+				next();
+			});
+		});
+	});
+}
+
+/* Check that user has logged in */
+function checkAuth() {
+	return (function(req, res, next) {
+		if(!(req.session && req.session.user)) {
+			util.log('checkAuth(): failed');
+			return next("Access Denied");
+		}
+		util.log('checkAuth(): successful');
+		next();
+	});
+}
+
 /* Validate and prepare email keyword */
 function prepBodyEmail(key) {
 	var key = key || 'email';
@@ -195,6 +239,27 @@ function prepSQLRowBy(table, key) {
 	});
 }
 
+/* Relink request property also as next key */
+function prepRename(next_key, prev_key) {
+	var keys = (""+prev_key).split(".");
+	console.log('keys = ' + sys.inspect(keys));
+	return (function(req, res, next) {
+		function lookup(obj) {
+			console.log('keys = ' + sys.inspect(keys));
+			if(obj !== req) console.log('obj = ' + sys.inspect(obj));
+			var k = keys.shift();
+			console.log('k = ' + sys.inspect(k));
+			if(!k) return obj;
+			if(obj[k] && (typeof obj[k] === 'object') ) return lookup(obj[k]);
+			console.log('obj[k] = ' + sys.inspect(obj[k]));
+			return obj[k];
+		}
+		req[next_key] = lookup(req);
+		console.log('req['+next_key+'] set to ' + sys.inspect(req[next_key]));
+		next();
+	});
+}
+
 /* Update SQL rows */
 function updateSQLRow(table, keys) {
 	var table = table,
@@ -208,21 +273,27 @@ function updateSQLRow(table, keys) {
 			res.redirect('back');
 		}
 		
-		if(!req[key]) return next("request has no key: " + key);
-		
 		var where = {},
 		    what = {}, 
 		    id_key = table+"_id";
+		
+		if(!req[id_key]) return next("request has no key: " + id_key);
 		where[id_key] = req[id_key];
 		
-		foreach(keys).do(function(k) {
-			what[k] = req[k];
-		});
-		
+		try {
+			foreach(keys).do(function(k) {
+				if(!req[k]) throw new Error("request has no key: " + k);
+				what[k] = req[k];
+			});
+		} catch(e) {
+			return next(e);
+		}
 		if(!tables[table]) return next('table missing: ' + table);
 		
+		util.log('Updating SQL...');
 		tables[table].update(what).where(where).do(function(err) {
 			if(err) return next('Virhe tietokantayhteydessä. Kokeile hetken kuluttua uudelleen.');
+			req.flash('info', 'Tiedot päivitetty onnistuneesti.');
 			next();
 		});
 	});
@@ -236,8 +307,22 @@ function createAuthKey(email_key) {
 		    user_id = req.user_id;
 		if(!user_id) return next("user_id puuttuu");
 		activation.create({'user_id':user_id}, function(err, key) {
-			if(err) return next(err);
+			if(err) return next('createAuthKey: '+err);
 			req.authKey = key;
+			next();
+		});
+	});
+}
+
+/* Remove authKey */
+function removeAuthKey(key) {
+	var key = key || 'authKey';
+	return (function(req, res, next) {
+		var key = req[key];
+		if(!key) return next("missing: "+ key);
+		activation.remove(key, function(err, key) {
+			if(err) return next('removeAuthKey: '+err);
+			delete req.authKey;
 			next();
 		});
 	});
@@ -269,14 +354,26 @@ app.get('/login/reset', function(req, res){
 	res.render('login/reset', {'title': 'Salasanan vaihtaminen'});
 });
 
+/* Handle login process */
+app.post('/login', prepLoginAuth(), checkAuth(), function(req, res){
+	res.redirect('back');
+});
+
 /* Display login page */
 app.get('/login', function(req, res){
 	res.render('login/index', {title: 'Sisäänkirjautuminen' });
 });
 
-/* Ask validation from user for authKey */
-app.post('/act/:authKey', prepBodyPasswords(), updateSQLRow('user', ['password']), function(req, res){
+/* Display logout page */
+app.get('/logout', function(req, res){
+	delete req.session.user;
+	req.flash('info', 'Olet nyt kirjautunut ulos.');
 	res.redirect('back');
+});
+
+/* Ask validation from user for authKey */
+app.post('/act/:authKey', prepBodyPasswords(), updateSQLRow('user', ['password']), removeAuthKey(), function(req, res){
+	res.redirect('/profile');
 });
 
 /* Ask validation from user for authKey */
@@ -288,6 +385,26 @@ app.get('/act/:authKey', function(req, res){
 app.get('/game', function(req, res){
 	var latest_game = '2011-I';
 	res.redirect(site_url+'/game/'+latest_game+'/index');
+});
+
+/* User profile page */
+app.get('/profile', checkAuth(), function(req, res){
+	res.redirect('profile/index');
+});
+
+/* User profile page */
+app.get('/profile/index', checkAuth(), function(req, res){
+	res.render('profile/index', {title: 'Käyttäjätiedot'});
+});
+
+/* User profile page */
+app.post('/profile/edit', checkAuth(), prepBodyPasswords(), prepRename('user_id', 'session.user.user_id'), updateSQLRow('user', ['password']), function(req, res){
+	res.redirect('back');
+});
+
+/* User profile page */
+app.get('/profile/edit', checkAuth(), function(req, res){
+	res.render('profile/edit', {title: 'Muokkaa tietojasi'});
 });
 
 /* Game page */

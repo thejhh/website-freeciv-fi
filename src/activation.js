@@ -4,6 +4,7 @@
  */
 
 var config = require('./config.js'),
+    _rand = require('./rand.js'),
     _db = require('./couchdb.js').activations,
     _lib = module.exports = {};
 
@@ -28,12 +29,7 @@ _lib.remove = (function(key, callback) {
 
 /* Create new activation keyword */
 _lib.create_key = (function() {
-	var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz",
-		length = length || 32,
-		out = '',
-		i=0;
-	for (; i<length; i++) out += chars[Math.floor(Math.random() * chars.length)];
-	return out;
+	return _rand.string(32);
 });
 
 /* Create new activation request for data */
