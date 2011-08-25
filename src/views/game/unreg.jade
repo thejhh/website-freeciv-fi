@@ -1,0 +1,23 @@
+- if(session.user)
+	- if(work.userRegisteredToGame)
+		form(method='post', action='unreg')
+			fieldset
+				legend Ottelupaikan poistaminen
+				br
+				label Ottelu: 
+				= work.game.name
+				br
+				label Sähköposti: 
+				= session.user.email
+				input(type='hidden', name='email', value=session.user.email)
+				br
+				button(type='submit', class='button positive')
+					img(src='/images/blueprint/plugins/buttons/icons/tick.png', alt='')
+					| Vahvista
+				a(href='reg', class='button negative')
+					img(src='/images/blueprint/plugins/buttons/icons/cross.png', alt='')
+					| Peruuta
+	- else
+		| Ottelupaikkaa ei voi poistaa: Ette ole ilmoittautunut peliin.
+- else
+	| Tämä toiminto vaatii kirjautumisen sisälle.
