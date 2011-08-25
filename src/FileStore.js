@@ -3,6 +3,8 @@
  * Module dependencies.
  */
 
+/* FIXME: update expiration so that the session does not expire when user is using the system! */
+
 var sys = require('sys'),
     fs = require('fs');
 

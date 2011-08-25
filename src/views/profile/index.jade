@@ -1,0 +1,9 @@
+fieldset
+	legend Käyttäjätiedot
+	br
+	label Sähköposti: 
+	= session.user.email
+	br
+	a(href='/profile/edit', class='button positive')
+		img(src='/images/blueprint/plugins/buttons/icons/key.png', alt='')
+		| Muokkaa tietoja

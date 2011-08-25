@@ -1,10 +1,12 @@
 #act
+	h3 Tervetuloa!
+	p Tunnuksenne aktivointi on melkein valmis: asettakaa seuraavaksi salasana.
 	form(method='post', action='/act/'+authKey)
 		fieldset
 			legend Salasanan asettaminen
-			br
 			label Sähköposti: 
 			= email
+			br
 			br
 			label Salasana:
 			br
@@ -13,7 +15,6 @@
 			label Salasana (uudelleen):
 			br
 			input(type='password', name='password2', value='')
-			br
 			br
 			button(type='submit', class='button positive')
 				img(src='/images/blueprint/plugins/buttons/icons/tick.png', alt='')

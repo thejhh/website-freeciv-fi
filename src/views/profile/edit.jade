@@ -1,0 +1,22 @@
+form(method='post', action='/profile/edit')
+	fieldset
+		legend Tietojen muokkaaminen
+		br
+		label Sähköposti: 
+		= session.user.email
+		br
+		label Salasana:
+		br
+		input(type='password', name='password', value='')
+		br
+		label Salasana (uudelleen):
+		br
+		input(type='password', name='password2', value='')
+		br
+		br
+		button(type='submit', class='button positive')
+			img(src='/images/blueprint/plugins/buttons/icons/tick.png', alt='')
+			| Tallenna
+		a(href='index', class='button negative')
+			img(src='/images/blueprint/plugins/buttons/icons/cross.png', alt='')
+			| Peruuta
