@@ -38,6 +38,11 @@ module.exports = (function(connect) {
 	FileStore.prototype.set = (function(sid, session, callback) {
 		var undefined;
 		try {
+			/*
+			var maxAge = session.cookie.maxAge,
+			    oneDay = 86400,
+				ttl = ('number' == typeof maxAge) ? (maxAge / 1000 | 0) : oneDay;
+			*/
 			//console.log('Saving sid = ' + sys.inspect(sid) + ', session = ' + sys.inspect(session));
 			fs.writeFile(this.session_dir + '/sess-' + sid + '.json', JSON.stringify(session), function (err, res) {
 				if (err) {

@@ -1,4 +1,4 @@
-#act
+- if(!session.user)
 	form(method='post', action='/login')
 		fieldset
 			legend Sisäänkirjautuminen
@@ -15,3 +15,5 @@
 				img(src='/images/blueprint/plugins/buttons/icons/tick.png', alt='')
 				| Kirjaudu sisälle
 			a(href='/login/reset', class='button') Salasana hukassa?
+- else
+	| Olette kirjautuneena sisälle.

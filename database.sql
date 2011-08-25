@@ -29,8 +29,8 @@ CREATE TABLE `reg` (
 /* Players */
 CREATE TABLE `player` (
 	player_id   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-	reg_id      INT UNSIGNED UNIQUE NOT NULL DEFAULT 0,
 	game_id     INT UNSIGNED NOT NULL DEFAULT 0,
+	reg_id      INT UNSIGNED UNIQUE NOT NULL DEFAULT 0,
 	name        VARCHAR(255) NOT NULL DEFAULT '',
 	nation      VARCHAR(255) NOT NULL DEFAULT '',
 	UNIQUE KEY `game_nation_key` (game_id,nation),

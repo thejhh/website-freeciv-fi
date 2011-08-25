@@ -27,26 +27,34 @@ p
 		fieldset
 			legend Otteluun ilmoittautuminen
 			| Nyt ilmoittautunut: 
-			b= players
+			b= work.players
 			b /126
 			|  - vapaana vielä 
-			b= free_players
+			b= work.free_players
 			b &nbsp;KPL
 			| !
 			br
 			br
 			label Sähköposti:
 			br
-			input(name='email')
+			- if(session.user)
+				= session.user.email
+				input(type='hidden', name='email', value=session.user.email)
+			- else
+				input(name='email')
 			br
-			button(type='submit', class='button positive')
-				img(src='/images/blueprint/plugins/buttons/icons/tick.png', alt='')
-				| Lähetä ilmoitus
+			- if(work.userRegisteredToGame)
+				a(href='unreg', class='button negative')
+					img(src='/images/blueprint/plugins/buttons/icons/cross.png', alt='')
+					| Peruuta
+			- else
+				button(type='submit', class='button positive')
+					img(src='/images/blueprint/plugins/buttons/icons/tick.png', alt='')
+					| Lähetä
 			br
 			hr
 			div(class='small') Käytämme sähköpostiosoitetta ainoastaan tämän verkkopalvelun käyttäjätunnuksena ja ajankohtaisten tiedotteiden lähettämiseen. Emme julkaise tai levitä osoitetta edelleen.
 div(class='sponsors')
-	hr
 	| Yhteistyössä mukana: 
 	br
 	a(href="http://www.v2.fi", target="_blank")

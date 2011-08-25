@@ -12,5 +12,6 @@ var config = require('./config.js'),
 tables.game = sql.table(table_prefix + 'game');
 tables.user = sql.table(table_prefix + 'user');
 tables.player = sql.table(table_prefix + 'player');
+tables.reg = sql.table(table_prefix + 'reg');
 
 /* EOF */

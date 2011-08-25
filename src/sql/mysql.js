@@ -57,6 +57,7 @@ _lib.insert = (function(table, data, callback) {
 _lib.select = (function(table, options, callback) {
 	try {
 		var client = _client,
+		    what = options.what || ['*'],
 		    keys=[],
 		    values=[],
 		    options = options || {},
@@ -68,10 +69,42 @@ _lib.select = (function(table, options, callback) {
 			keys.push(k);
 			values.push(v);
 		});
-		query = 'SELECT * FROM `'+table+'`';
-		if(keys.length !== 0) query += ' WHERE `' + keys.join('` = ?, `') + '` = ?';
+		query = 'SELECT ' + what.join(', ') + ' FROM `'+table+'`';
+		if(keys.length !== 0) query += ' WHERE `' + keys.join('` = ? AND `') + '` = ?';
 		if(limit) query += ' LIMIT ' + limit;
 		util.log("Executing query for sql-mysql.js:select("+sys.inspect(table)+", "+sys.inspect(options.where)+"): " + query);
+		client.query(
+			query,
+			values,
+			function(err, results, fields) {
+				return callback(err, results, fields);
+			}
+		);
+	} catch(e) {
+		callback(e);
+	}
+	return _lib;
+});
+
+/* Delete row(s) from table */
+_lib.del = (function(table, options, callback) {
+	try {
+		var client = _client,
+		    keys=[],
+		    values=[],
+		    options = options || {},
+			where = options.where || {},
+			limit = options.limit,
+		    query;
+		if(!client) return callback("!client");
+		foreach(options.where).do(function(v, k) {
+			keys.push(k);
+			values.push(v);
+		});
+		query = 'DELETE FROM `'+table+'`';
+		if(keys.length !== 0) query += ' WHERE `' + keys.join('` = ? AND `') + '` = ?';
+		if(limit) query += ' LIMIT ' + limit;
+		util.log("Executing query for sql-mysql.js:delete("+sys.inspect(table)+", "+sys.inspect(options.where)+"): " + query);
 		client.query(
 			query,
 			values,
@@ -117,7 +150,7 @@ _lib.update = (function(table, options, callback) {
 		});
 		util.log("Building query...");
 		query = 'UPDATE `'+table+'` SET '+ what_keys.join(', ');
-		if(where_keys.length !== 0) query += ' WHERE `' + where_keys.join('` = ?, `') + '` = ?';
+		if(where_keys.length !== 0) query += ' WHERE `' + where_keys.join('` = ? AND `') + '` = ?';
 		if(limit) query += ' LIMIT ' + limit;
 		util.log("Executing query for sql-mysql.js:update("+sys.inspect(table)+", "+sys.inspect(where)+"): " + query);
 		client.query(
