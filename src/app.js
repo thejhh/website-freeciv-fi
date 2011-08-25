@@ -445,7 +445,7 @@ app.get('/game/:gameTag', function(req, res){
 
 /* Game page */
 app.get('/game/:gameTag/index', function(req, res){
-	tables.user.count(function(err, players) {
+	tables.reg.count(function(err, players) {
 		if(err) req.flash('error', "Tietokantayhteydessä tapahtui virhe: Sivulla voi olla vääriä tietoja.");
 		var free_players = 126 - players;
 		res.render('reg', {title: 'Freeciv.fi Syyskuu 2011/I', players:players, 'free_players':free_players});
@@ -459,15 +459,25 @@ app.post('/game/:gameTag/reg', function(req, res) {
 	if(email === "") req.flash('error', "Sähköpostiosoite on tyhjä.");
 	else if(!email.match('@')) req.flash('error', "Sähköpostiosoite ei ole toimiva: " + email);
 	else {
-		tables.user.insert({'email':email}, function(err) {
+		
+		// TODO: FIXME: Split this function into three middlewares: prepEmail, addUserIfNeeded, addReg
+		
+		tables.user.insert({'game_id':req.game_id, 'email':email}, function(err, user_id) {
 			if(err) {
-				util.log('Error: '+err);
 				req.flash('error', 'Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.');
-			} else {
-				req.flash('info', 'Sähköpostiosoite lisätty: ' + email);
-				req.flash('info', 'Lähetämme erillisen vahvistuksen vielä ennen pelin aloittamista.');
+				res.redirect(site_url+'/reg');
+				return;
 			}
-			res.redirect(site_url+'/reg');
+			tables.reg.insert({'game_id':req.game_id, 'user_id':user_id}, function(err) {
+				if(err) {
+					util.log('Error: '+err);
+					req.flash('error', 'Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.');
+				} else {
+					req.flash('info', 'Sähköpostiosoite lisätty: ' + email);
+					req.flash('info', 'Lähetämme erillisen vahvistuksen vielä ennen pelin aloittamista.');
+				}
+				res.redirect(site_url+'/reg');
+			});
 		});
 		error = false;
 	}

@@ -22,7 +22,6 @@ p
 	a(href="http://www.v2.fi/artikkelit/pelit/6/Vapaa-oli-sivilisaationi/") Vapaa oli sivilisaationi 15.04.2007
 	| .
 
-hr
 #ilmo
 	form(method='post', action='reg')
 		fieldset
@@ -46,18 +45,6 @@ hr
 			br
 			hr
 			div(class='small') Käytämme sähköpostiosoitetta ainoastaan tämän verkkopalvelun käyttäjätunnuksena ja ajankohtaisten tiedotteiden lähettämiseen. Emme julkaise tai levitä osoitetta edelleen.
-
-hr
-- if (flash)
-	- if (flash.error)
-		h4 Virheitä tapahtui:
-		- each msg in flash.error
-			div(class='error')= msg
-		hr
-	- if (flash.info)
-		h4 Kiitos ilmoituksesta!
-		- each msg in flash.info
-			div(class='info')= msg
 div(class='sponsors')
 	hr
 	| Yhteistyössä mukana: 
