@@ -18,6 +18,7 @@ var express = require('express'),
     couchdb = require('./couchdb.js'),
     activation = require('./activation.js'),
     emails = require('./emails.js'),
+    freeciv = require('./freeciv.js'),
     FileStore = require('./FileStore.js')(express),
     client;
 
@@ -26,6 +27,20 @@ express.work = (function (options) {
 	return (function(req, res, next) {
 		req.work = {};
 		next();
+	});
+});
+
+/* Support for request.freeciv */
+express.freeciv = (function (options) {
+	return (function(req, res, next) {
+		freeciv.data( __dirname + '/../freeciv.json', function(err, data) {
+			if(err) {
+				req.freeciv = {};
+				return next(err);
+			}
+			req.freeciv = data;
+			next();
+		});
 	});
 });
 
@@ -62,6 +77,7 @@ app.configure(function(){
 	app.use(express.methodOverride());
 	app.use(express.cookieParser());
 	app.use(express.work());
+	app.use(express.freeciv());
 	app.use(express.session({ 'secret':secret, 'store':new FileStore }));
 	app.use(app.router);
 	app.use(express.static(__dirname + '/public'));
@@ -94,6 +110,9 @@ app.dynamicHelpers({
 	},
 	work: function(req, res){
 		return req.work;
+	},
+	freeciv: function(req, res){
+		return req.freeciv;
 	},
 	flash: function(req, res) {
 		return req.flash();
@@ -214,7 +233,7 @@ function checkAuth() {
 	return (function(req, res, next) {
 		if(!(req.session && req.session.user)) {
 			util.log('checkAuth: failed');
-			return next(new WebError("Access Denied"));
+			return next(new WebError("Tämä toiminto vaatii sisäänkirjautumisen."));
 		}
 		util.log('checkAuth: successful');
 		next();
@@ -398,10 +417,14 @@ function updateUserRegisteredToGame() {
 			    user_id = req.session && req.session.user && req.session.user.user_id;
 			if(!game_id) return next();
 			if(!user_id) return next();
-			tables.reg.select('COUNT(*) AS count').where({'game_id':game_id, 'user_id':user_id}).limit(1).do(function(err, rows) {
+			tables.reg.select('*').where({'game_id':game_id, 'user_id':user_id}).limit(1).do(function(err, rows) {
 				if(err) return next();
 				req.work.userRegisteredToGame = null;
-				if(rows && rows[0] && rows[0].count && (rows[0].count === 1)) req.work.userRegisteredToGame = user_id;
+				if(rows && rows[0] && rows[0].reg_id) {
+					req.work.userRegisteredToGame = user_id;
+					req.work.reg_id = rows[0].reg_id;
+					req.work.reg = rows[0];
+				}
 				util.log("updateUserRegisteredToGame: work.userRegisteredToGame === " + sys.inspect(req.work.userRegisteredToGame));
 				next();
 			});
@@ -438,13 +461,13 @@ function prepCurrentUserID(key) {
 	var key = key || 'email';
 	return (function(req, res, next) {
 		
-		if(!req.work[key]) return next(new TypeError("addReg: req.work."+key+" was not prepared!"));
-		
 		// 1) Use current user if logged in
 		if(req.session && req.session.user && req.session.user.user_id) {
 			req.work.user_id = req.session.user.user_id;
 			return next();
 		}
+		
+		if(!req.work[key]) return next(new TypeError("addReg: req.work."+key+" was not prepared!"));
 		
 		// Check if user has registered already but just not logged in, and tell him that.
 		
@@ -477,8 +500,8 @@ function addReg(key) {
 function delReg(key) {
 	var key = key || 'user_id';
 	return (function(req, res, next) {
-		if(!req.work['game_id']) return next(new TypeError("addReg: req.work.game_id was not prepared!"));
-		if(!req.work[key]) return next(new TypeError("addReg: req.work.user_id was not prepared!"));
+		if(!req.work['game_id']) return next(new TypeError("delReg: req.work.game_id was not prepared!"));
+		if(!req.work[key]) return next(new TypeError("delReg: req.work.user_id was not prepared!"));
 		tables.reg.del().where({'game_id':req.work.game_id, 'user_id':req.work.user_id}).limit(1).do(function(err) {
 			if(err) return next(new WebError('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.', err));
 			req.flash('info', 'Teidät on nyt poistettu pelistä.');
@@ -492,6 +515,66 @@ function redirect(where) {
 	var where = where || 'back';
 	return (function(req, res, next) {
 		res.redirect(where);
+	});
+}
+
+/* Prepare data to request.work.reg */
+function prepRegData() {
+	return (function(req, res, next) {
+		if(!req.work['game_id']) return next(new TypeError("prepRegData: req.work.game_id was not prepared!"));
+		if(!req.work['user_id']) return next(new TypeError("prepRegData: req.work.user_id was not prepared!"));
+		tables.reg.select('*').where({'game_id':req.work.game_id, 'user_id':req.work.user_id}).limit(1).do(function(err, rows) {
+			if(err) return next(new WebError('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.', err));
+			if(!(rows && rows[0])) return next(new WebError('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.', err));
+			req.work.reg_id = rows[0]['reg_id'];
+			req.work.reg = rows[0];
+			next();
+		});
+	});
+}
+
+/* Prepare data to request.work.reg */
+function prepPlayerData() {
+	return (function(req, res, next) {
+		if(!req.work['game_id']) return next(new TypeError("prepPlayerData: req.work.game_id was not prepared!"));
+		if(!req.work['reg_id']) return next();
+		tables.player.select('*').where({'game_id':req.work.game_id, 'reg_id':req.work.reg_id}).limit(1).do(function(err, rows) {
+			if(err) return next(new WebError('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.', err));
+			if(!(rows && rows[0])) return next(new WebError('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.', err));
+			req.work.player_id = rows[0]['player_id'];
+			req.work.player = rows[0];
+			next();
+		});
+	});
+}
+
+/* Setup player */
+function setupPlayer(key) {
+	return (function(req, res, next) {
+		var nation = trim(""+req.body.nation),
+		    name = trim(""+req.body.name);
+		if(nation.length === 0) return next(new WebError('Kansallisuus valitsematta'));
+		if(name.length === 0) return next(new WebError('Hallitsijan nimi valitsematta'));
+		if(!req.work['game_id']) return next(new TypeError("setupPlayer: req.work.player_id was not prepared!"));
+		if(!req.work['reg_id']) return next(new TypeError("setupPlayer: req.work.reg_id was not prepared!"));
+		tables.player.select('*').where({'game_id':req.work.game_id, 'reg_id':req.work.reg_id}).limit(1).do(function(err, rows) {
+			if(err) return next(new WebError('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.', err));
+			if(rows && rows[0] && rows[0].player_id) {
+				tables.player.update({'name':name, 'nation':nation}).where({'player_id':rows[0].player_id}).limit(1).do(function(err) {
+					if(err) return next(new WebError('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.', err));
+					req.work.player_id = rows[0].player_id;
+					req.flash('info', 'Pelaajan tiedot päivitetty.');
+					next();
+				});
+			} else {
+				tables.player.insert({'game_id':req.work.game_id, 'reg_id':req.work.reg_id, 'name':name, 'nation':nation}, function(err, player_id) {
+					if(err) return next(new WebError('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.', err));
+					req.work.player_id = player_id;
+					req.flash('info', 'Pelaajan tiedot lisätty.');
+					next();
+				});
+			}
+		});
 	});
 }
 
@@ -583,25 +666,35 @@ app.namespace('/game', function(){
 		});
 		
 		/* Game page */
-		app.get('/index', updateUserRegisteredToGame(), updateGameCount(), function(req, res){
+		app.get('/index', updateUserRegisteredToGame(), prepPlayerData(), updateGameCount(), function(req, res){
 			res.render('game/reg', {'title': 'Ottelu '+req.work.game.name, players:req.work.players, 'free_players':req.work.free_players});
 		});
 		
 		/* Game page */
-		app.get('/reg', updateUserRegisteredToGame(), updateGameCount(), function(req, res){
+		app.get('/reg', updateUserRegisteredToGame(), prepPlayerData(), updateGameCount(), function(req, res){
 			res.render('game/reg', {'title':'Ottelu '+req.work.game.name});
 		});
 		
+		/* Handle registration request */
+		app.post('/reg', prepBodyEmail(), prepCurrentUserID(), addReg(), redirect('back'));
+		
 		/* Handle unregistration request */
-		app.get('/unreg', checkAuth(), updateUserRegisteredToGame(), function(req, res){
-			res.render('game/unreg', {'title':'Ottelu '+req.work.game.name});
+		app.get('/unreg', checkAuth(), updateUserRegisteredToGame(), prepPlayerData(), function(req, res){
+			res.render('game/unreg', {'title':'Poista pelaaja - Ottelu '+req.work.game.name});
 		});
 		
 		/* Handle unregistration request */
 		app.post('/unreg', prepBodyEmail(), checkAuth(), prepCurrentUserID(), delReg(), redirect('back'));
 		
-		/* Handle registration request */
-		app.post('/reg', prepBodyEmail(), prepCurrentUserID(), addReg(), redirect('back'));
+		/* Handle unregistration request */
+		app.get('/setup', checkAuth(), updateUserRegisteredToGame(), prepPlayerData(), function(req, res){
+			res.render('game/setup', {'title':'Muokkaa pelaajan tietoja - Ottelu '+req.work.game.name});
+		});
+		
+		/* Handle setup request */
+		app.post('/setup', checkAuth(), prepCurrentUserID(), prepRegData(), setupPlayer(), function(req, res){
+			res.redirect(site_url+'/game/'+req.work.game.tag+'/index');
+		});
 		
 	}); // end of /game/:gameTag
 	

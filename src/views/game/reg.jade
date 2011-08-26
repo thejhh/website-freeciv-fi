@@ -44,6 +44,22 @@ p
 				input(name='email')
 			br
 			- if(work.userRegisteredToGame)
+				label Kansalaisuus: 
+				- if(work.player)
+					= work.player.nation
+				- else
+					| Valitsematta
+				br
+				label Hallitsijan nimi: 
+				- if(work.player)
+					= work.player.name
+				- else
+					| Valitsematta
+				br
+			- if(work.userRegisteredToGame)
+				a(href='setup', class='button positive')
+					img(src='/images/blueprint/plugins/buttons/icons/tick.png', alt='')
+					| Muokkaa
 				a(href='unreg', class='button negative')
 					img(src='/images/blueprint/plugins/buttons/icons/cross.png', alt='')
 					| Poista varaus
