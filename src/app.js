@@ -627,7 +627,7 @@ app.namespace('/act/:authKey', function(){
 			req.body.password = req.work.password;
 			next();
 		},
-		prepLoginAuth('/login'), checkAuth(), redirect('/profile') );
+		prepLoginAuth('/login'), checkAuth(), redirect(site_url+'/profile') );
 	
 }); // end of /act/:authKey
 
@@ -637,7 +637,7 @@ app.namespace('/profile', function(){
 	
 	/* User profile page */
 	app.get('/', checkAuth(), function(req, res){
-		res.redirect('profile/index');
+		res.redirect(site_url+'/profile/index');
 	});
 	
 	/* User profile page */
