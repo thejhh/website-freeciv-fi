@@ -43,9 +43,8 @@ _lib.send = (function(file, context, options, callback) {
 		nodemailer.send_mail(options,
 			function(err, success){
 				util.log('Mailing to ' + options.to + ': Message ' + (success ? 'sent' : 'failed') );
-				callback(err);
-			}
-		);
+			});
+		callback();
 	});
 });
 
