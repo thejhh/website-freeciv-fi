@@ -71,7 +71,7 @@ app.configure(function(){
 		util.log('Error: ' + err.toString() );
 		if(err.stack) util.log('Stack: ' + err.stack );
 		if(err.orig) util.log('Orig error: ' + err.orig );
-		if(err.orig.stack) util.log('Orig stack: ' + err.orig.stack );
+		if(err.orig && err.orig.stack) util.log('Orig stack: ' + err.orig.stack );
 		req.flash('error', ''+err.msg);
 		res.render('error_page.jade', {'title':'Virhe tapahtui'} );
 	});
@@ -467,7 +467,7 @@ function addReg(key) {
 		if(!req.work[key]) return next(new TypeError("addReg: req.work.user_id was not prepared!"));
 		tables.reg.insert({'game_id':req.work.game_id, 'user_id':req.work.user_id}, function(err) {
 			if(err) return next(new WebError('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.', err));
-			req.flash('info', 'Olette nyt poistettu pelistä.');
+			req.flash('info', 'Teidät on nyt lisätty peliin.');
 			next();
 		});
 	});
@@ -481,7 +481,7 @@ function delReg(key) {
 		if(!req.work[key]) return next(new TypeError("addReg: req.work.user_id was not prepared!"));
 		tables.reg.del().where({'game_id':req.work.game_id, 'user_id':req.work.user_id}).limit(1).do(function(err) {
 			if(err) return next(new WebError('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.', err));
-			req.flash('info', 'Ilmoittautuminen peliin poistettu.');
+			req.flash('info', 'Teidät on nyt poistettu pelistä.');
 			next();
 		});
 	});
@@ -584,17 +584,17 @@ app.namespace('/game', function(){
 		
 		/* Game page */
 		app.get('/index', updateUserRegisteredToGame(), updateGameCount(), function(req, res){
-			res.render('reg', {'title': 'Ottelu '+req.work.game.name, players:req.work.players, 'free_players':req.work.free_players});
+			res.render('game/reg', {'title': 'Ottelu '+req.work.game.name, players:req.work.players, 'free_players':req.work.free_players});
 		});
 		
 		/* Game page */
 		app.get('/reg', updateUserRegisteredToGame(), updateGameCount(), function(req, res){
-			res.render('reg', {'title':'Ottelu '+req.work.game.name});
+			res.render('game/reg', {'title':'Ottelu '+req.work.game.name});
 		});
 		
 		/* Handle unregistration request */
 		app.get('/unreg', checkAuth(), updateUserRegisteredToGame(), function(req, res){
-			res.render('unreg', {'title':'Ottelu '+req.work.game.name});
+			res.render('game/unreg', {'title':'Ottelu '+req.work.game.name});
 		});
 		
 		/* Handle unregistration request */

@@ -35,22 +35,22 @@ p
 			| !
 			br
 			br
-			label Sähköposti:
-			br
+			label Sähköposti: 
 			- if(session.user)
 				= session.user.email
 				input(type='hidden', name='email', value=session.user.email)
 			- else
+				br
 				input(name='email')
 			br
 			- if(work.userRegisteredToGame)
 				a(href='unreg', class='button negative')
 					img(src='/images/blueprint/plugins/buttons/icons/cross.png', alt='')
-					| Peruuta
+					| Poista varaus
 			- else
 				button(type='submit', class='button positive')
 					img(src='/images/blueprint/plugins/buttons/icons/tick.png', alt='')
-					| Lähetä
+					| Lähetä varaus
 			br
 			hr
 			div(class='small') Käytämme sähköpostiosoitetta ainoastaan tämän verkkopalvelun käyttäjätunnuksena ja ajankohtaisten tiedotteiden lähettämiseen. Emme julkaise tai levitä osoitetta edelleen.
