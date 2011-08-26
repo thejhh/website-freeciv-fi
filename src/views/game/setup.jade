@@ -1,0 +1,31 @@
+#setup
+	- if(work.userRegisteredToGame)
+		form(method='post', action='setup')
+			fieldset
+				legend Pelaajan asetukset
+				label Kansallisuus: 
+				br
+				select(name='nation')
+					option(value='') Valitse kansallisuus
+					- each nation, i in freeciv.nations
+						- if(work.player.nation == nation.name)
+							option(value=nation.name, selected='selected')= nation.name
+						- else
+							option(value=nation.name)= nation.name
+				br
+				label Hallitsijan nimi: 
+				br
+				input(type='text', name='name', value=work.player.name)
+				br
+				button(type='submit', class='button positive')
+					img(src='/images/blueprint/plugins/buttons/icons/tick.png', alt='')
+					| Tallenna
+				a(href='index', class='button negative')
+					img(src='/images/blueprint/plugins/buttons/icons/cross.png', alt='')
+					| Peruuta
+				hr
+				div(class='small')
+					b Huomaa! 
+					| Kansalaisuus ja hallitsijan nimi näkyvät julkisesti muille pelaajille.
+	- else
+		p Ette ole rekisteröityneet peliin vielä.
