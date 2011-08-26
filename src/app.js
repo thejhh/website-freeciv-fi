@@ -702,7 +702,7 @@ app.namespace('/game', function(){
 }); // end of /game
 
 /* Set port to listen */
-app.listen(3000);
+app.listen(config.port || 3000);
 util.log("main: Express server listening on port "+app.address().port+" in "+app.settings.env+" mode");
 
 /* EOF */

@@ -12,5 +12,7 @@
     , "snippets": ">= 0.0.5"
     , "pg": "*"
     , "mysql": "*"
+    , "cradle": "*"
+    , "nodemailer": "*"
   }
 }
