@@ -23,7 +23,9 @@ activation.create({'user_id':1234}, function(err, key) {
 	});
 });
 
+/*
 activation.test('helloworld', function(err, data) {
 	if(err) return do_error(err);
 	console.log('Received data: ' + sys.inspect(data));
 });
+*/
