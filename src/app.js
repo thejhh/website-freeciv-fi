@@ -580,6 +580,28 @@ function updateGameCount() {
 	});
 }
 
+/* Update information about registration in current game for current user */
+function updateGamePlayerList() {
+	return (function(req, res, next) {
+		try {
+			req.work.players = [];
+			if(!req.work.game_id) throw Error("missing: req.work.game_id");
+			tables.player.select('*').where({'game_id':req.work.game_id}).do(function(err, rows) {
+				try {
+					if(err) req.flash('error', "Tietokantayhteydessä tapahtui virhe: Sivulla voi olla vääriä tietoja.");
+					if(rows) req.work.players = rows;
+				} catch(e) {
+					util.log('updateGamePlayerList: Exception: ' + e + ' [ignored]');
+				}
+				next();
+			});
+		} catch(e) {
+			util.log('updateGamePlayerList: Exception: ' + e + ' [ignored]');
+			next();
+		}
+	});
+}
+
 /* Prepare user data for next request
  * 1) Use current user if logged in,
  * 2) Try to add a new user if not logged in
@@ -928,12 +950,12 @@ app.namespace('/game', function(){
 		});
 		
 		/* Game page */
-		app.get('/index', updateUserRegisteredToGame(), prepPlayerData(), updateGameCount(), function(req, res){
+		app.get('/index', updateUserRegisteredToGame(), prepPlayerData(), updateGameCount(), updateGamePlayerList(), function(req, res){
 			res.render('game/reg', {'title': 'Ottelu '+req.work.game.name, players:req.work.players, 'free_players':req.work.free_players});
 		});
 		
 		/* Game page */
-		app.get('/reg', updateUserRegisteredToGame(), prepPlayerData(), updateGameCount(), function(req, res){
+		app.get('/reg', updateUserRegisteredToGame(), prepPlayerData(), updateGameCount(), updateGamePlayerList(), function(req, res){
 			res.render('game/reg', {'title':'Ottelu '+req.work.game.name});
 		});
 		

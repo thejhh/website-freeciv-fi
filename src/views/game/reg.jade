@@ -26,6 +26,16 @@ p
 	b Päivitys: 
 	| Varmistusviestit on lähetetty 26.08.2011 noin kello 11:00-13:00. Tarkista sähköpostisi!
 
+hr
+table
+	caption Pelaajat
+	tr
+		th Kansa
+		th Hallitsija
+	- each player, i in work.players
+		tr
+			td= player.nation
+			td= player.name
 #ilmo
 	form(method='post', action='reg')
 		fieldset
