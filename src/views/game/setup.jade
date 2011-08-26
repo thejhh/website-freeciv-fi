@@ -7,7 +7,9 @@
 				br
 				select(name='nation')
 					option(value='') Valitse kansallisuus
-					- each nation, i in freeciv.nations
+					- if (work.player && work.player.nation)
+						option(value=work.player.nation, selected='selected')= work.player.nation
+					- each nation, i in work.free_nations
 						- if(work.player && work.player.nation == nation.name)
 							option(value=nation.name, selected='selected')= nation.name
 						- else

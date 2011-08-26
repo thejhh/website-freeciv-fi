@@ -587,6 +587,35 @@ function setupPlayer(key) {
 	});
 }
 
+/* Setup player */
+function prepFreecivData(key) {
+	return (function(req, res, next) {
+		tables.player.select().where({'game_id':req.work.game_id}).do(function(err, rows) {
+			var free_nations = [], reserved=[];
+			if(err) return next(new WebError("Virhe tietokantayhteydessä"));
+			
+			if(rows) {
+				foreach(rows).do(function(player) {
+					reserved.push(player.nation);
+				});
+			}
+			
+			foreach(req.freeciv.nations).do(function(nation) {
+				var is_reserved = false;
+				// FIXME: This next foreach isn't optimal!
+				foreach(reserved).do(function(n) {
+					if(nation.name === n) is_reserved = true;
+				});
+				if(is_reserved) return;
+				free_nations.push(nation);
+			});
+			
+			req.work.free_nations = free_nations;
+			next();
+		});
+	});
+}
+
 // Routes
 
 /* Root route */
@@ -696,7 +725,7 @@ app.namespace('/game', function(){
 		app.post('/unreg', prepBodyEmail(), checkAuth(), prepCurrentUserID(), delPlayer(), delReg(), redirect('back'));
 		
 		/* Handle unregistration request */
-		app.get('/setup', checkAuth(), updateUserRegisteredToGame(), prepPlayerData(), function(req, res){
+		app.get('/setup', checkAuth(), updateUserRegisteredToGame(), prepPlayerData(), prepFreecivData(), function(req, res){
 			res.render('game/setup', {'title':'Muokkaa pelaajan tietoja - Ottelu '+req.work.game.name});
 		});
 		
