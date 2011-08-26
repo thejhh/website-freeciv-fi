@@ -31,14 +31,26 @@ p
 		fieldset
 			legend Otteluun ilmoittautuminen
 			| Nyt ilmoittautunut: 
-			b= work.players
-			b /126
-			|  - vapaana vielä 
-			b= work.free_players
-			b &nbsp;KPL
-			| !
+			b= (work.players < 126) ? work.players : 126
+			| &nbsp;/
+			b 126&nbsp;KPL
 			br
-			br
+			- if (work.players < 126)
+				| Pelipaikkoja vapaana: 
+				b= work.free_players
+				b &nbsp;KPL
+				| !
+				br
+				hr
+			- else
+				| Varapelaajia ilmoittautunut: 
+				b= work.players-126
+				b &nbsp;KPL
+				br
+				hr
+				b Huomaa! 
+				| Uudet pelivaraukset menevät nyt varapelaajiksi!
+				hr
 			label Sähköposti: 
 			- if(session.user)
 				= session.user.email
@@ -74,8 +86,6 @@ p
 			br
 			hr
 			div(class='small')
-				b Huomaa! 
-				| Pelivaraus menee automaattisesti varapelaajapaikaksi tilan loppuessa peruutuksien varalle.
 				hr
 				| Käytämme sähköpostiosoitetta ainoastaan tämän verkkopalvelun käyttäjätunnuksena ja ajankohtaisten tiedotteiden lähettämiseen. Emme julkaise tai levitä osoitetta edelleen.
 div(class='sponsors')

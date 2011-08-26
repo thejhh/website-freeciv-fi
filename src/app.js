@@ -159,7 +159,7 @@ app.param('authKey', function(req, res, next, id){
 		var key = ""+req.params.authKey;
 		activation.test(key, function(err, data) {
 			try {
-				if(err) return throw new WebError('Virheellinen aktivointiavain', err);
+				if(err) throw new WebError('Virheellinen aktivointiavain', err);
 				util.log('authKey: authKeyData = ' + sys.inspect(data));
 				if(!data.user_id) throw new Error('Virheellinen aktivointidata: user_id puuttuu');
 				tables.user.select().where({'user_id':data.user_id}).limit(1).do(function(err, rows) {
@@ -758,7 +758,7 @@ function setupPlayer(key) {
 			if(nation.length === 0) throw new WebError('Kansallisuus valitsematta');
 			if(name.length === 0) throw new WebError('Hallitsijan nimi valitsematta');
 			if(!req.work['game_id']) throw new TypeError("setupPlayer: req.work.player_id was not prepared!");
-			if(!req.work['reg_id']) throw new TypeError("setupPlayer: req.work.reg_id was not prepared!"));
+			if(!req.work['reg_id']) throw new TypeError("setupPlayer: req.work.reg_id was not prepared!");
 			tables.player.select('*').where({'game_id':req.work.game_id, 'reg_id':req.work.reg_id}).limit(1).do(function(err, rows) {
 				try {
 					if(err) throw new WebError('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.', err);
