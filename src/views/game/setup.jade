@@ -8,14 +8,17 @@
 				select(name='nation')
 					option(value='') Valitse kansallisuus
 					- each nation, i in freeciv.nations
-						- if(work.player.nation == nation.name)
+						- if(work.player && work.player.nation == nation.name)
 							option(value=nation.name, selected='selected')= nation.name
 						- else
 							option(value=nation.name)= nation.name
 				br
 				label Hallitsijan nimi: 
 				br
-				input(type='text', name='name', value=work.player.name)
+				- if (work.player)
+					input(type='text', name='name', value=work.player.name)
+				- else
+					input(type='text', name='name')
 				br
 				button(type='submit', class='button positive')
 					img(src='/images/blueprint/plugins/buttons/icons/tick.png', alt='')

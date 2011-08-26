@@ -67,7 +67,7 @@ WebError.prototype.toString = (function() {
 
 app.configure(function(){
 	var secret = (config && config.session && config.session.secret) || 'keyboard cat';
-
+	
 	app.set('views', __dirname + '/views');
 	app.set('view engine', 'jade');
 	
@@ -191,23 +191,19 @@ function prepLoginAuth(back) {
 	util.log('prepLoginAuth: start');
 	return (function(req, res, next) {
 		util.log('prepLoginAuth: call to instance');
-		function on_error(msg) {
-			req.flash('error', "Kirjautuminen epäonnistui");
-			res.redirect(back);
-		}
 		util.log('prepLoginAuth: req.body = ' + sys.inspect(req.body));
-		if(!req.body["email"]) return on_error("missing email");
-		if(!req.body["password"]) return on_error("missing password");
+		if(!req.body["email"]) return next(new WebError("Kirjautuminen epäonnistui"));
+		if(!req.body["password"]) return next(new WebError("Kirjautuminen epäonnistui"));
 		var email = ""+req.body.email,
 		    password = ""+req.body.password;
 		util.log('prepLoginAuth: Checking auth for email = ' + sys.inspect(email));
 		tables.user.authcheck({'email':email, 'password':password}, function(err, valid) {
-			if(err) return on_error('Kirjautuminen epäonnistui');
-			if(!valid) return on_error('Kirjautuminen epäonnistui');
+			if(err) return next(new WebError('Kirjautuminen epäonnistui', err));
+			if(!valid) return next(new WebError('Kirjautuminen epäonnistui'));
 			util.log('prepLoginAuth: Fetching user data for email = ' + sys.inspect(email));
 			tables.user.select().where({'email':email}).limit(1).do(function(err, data) {
-				if(err) return on_error('Kirjautuminen epäonnistui');
-				if(!data[0]) return on_error('Kirjautuminen epäonnistui');
+				if(err) return next(new WebError('Kirjautuminen epäonnistui', err));
+				if(!data[0]) return next(new WebError('Kirjautuminen epäonnistui'));
 				delete data[0].password;
 				req.session.user = data[0];
 				util.log('prepLoginAuth: User logged in as ' + sys.inspect(req.session.user));
@@ -225,6 +221,7 @@ function logout() {
 		util.log('logout: call to instance');
 		delete req.session.user;
 		req.flash('info', 'Olet nyt kirjautunut ulos.');
+		next();
 	});
 }
 
@@ -244,14 +241,10 @@ function checkAuth() {
 function prepBodyEmail(key) {
 	var key = key || 'email';
 	return (function(req, res, next) {
-		function on_error(msg) {
-			req.flash('error', "Sähköpostiosoite on virheellinen");
-			res.redirect('back');
-		}
-		if(!req.body[key]) return on_error("Osoite puuttuu");
+		if(!req.body[key]) return next(new WebError("Sähköpostiosoite puuttuu"));
 		var email = trim(""+req.body[key]);
-		if(email.length === 0) return on_error("Osoite on tyhjä");
-		if(!email.match('@')) return on_error("Ei ole toimiva: " + email);
+		if(email.length === 0) return next(new WebError("Sähköpostiosoite on tyhjä"));
+		if(!email.match('@')) return mext(new WebError("Ei ole toimiva: " + email));
 		req.work[key] = email;
 		next();
 	});
@@ -262,15 +255,11 @@ function prepBodyPasswords(key1, key2) {
 	var key1 = key1 || 'password',
 	    key2 = key2 || 'password2';
 	return (function(req, res, next) {
-		function on_error(msg) {
-			req.flash('error', "Salasanat ovat virheellisiä: "+msg);
-			res.redirect('back');
-		}
-		if(!(req.body[key1] && req.body[key2])) return on_error("Toinen salasanoista puuttuu");
+		if(!(req.body[key1] && req.body[key2])) return next(new WebError("Toinen salasanoista puuttuu"));
 		var pw1 = ""+req.body[key1];
 		var pw2 = ""+req.body[key2];
-		if(pw1.length < 8) return on_error("Salasanan tulee olla vähintään kahdeksan (8) merkkiä pitkä");
-		if(pw1 !== pw2) return on_error("Salasanat eivät vastaa toisiaan");
+		if(pw1.length < 8) return next(new WebError("Salasanan tulee olla vähintään kahdeksan (8) merkkiä pitkä"));
+		if(pw1 !== pw2) return next(new WebError("Salasanat eivät vastaa toisiaan"));
 		req.work[key1] = pw1;
 		next();
 	});
@@ -281,11 +270,6 @@ function prepSQLRowBy(table, key) {
 	var table = table || 'user',
 	    key = key || table+"_id";
 	return (function(req, res, next) {
-		function on_error(msg) {
-			req.flash('error', "Virhe tietokannan lukemisessa");
-			res.redirect('back');
-		}
-		
 		if(!req.work[key]) return next("request has no key: " + key);
 		
 		var where = {};
@@ -331,11 +315,6 @@ function updateSQLRow(table, keys) {
 		if(!table) return next('table missing');
 		if(!keys) return next('keys missing');
 		
-		function on_error(msg) {
-			req.flash('error', "Virhe tietokannan lukemisessa");
-			res.redirect('back');
-		}
-		
 		var where = {},
 		    what = {}, 
 		    id_key = table+"_id";
@@ -355,7 +334,7 @@ function updateSQLRow(table, keys) {
 		
 		util.log('updateSQLRow: Updating SQL...');
 		tables[table].update(what).where(where).limit(1).do(function(err) {
-			if(err) return on_error('Virhe tietokantayhteydessä. Kokeile hetken kuluttua uudelleen.');
+			if(err) return next(new WebError('Virhe tietokantayhteydessä. Kokeile hetken kuluttua uudelleen.', err));
 			req.flash('info', 'Tiedot päivitetty onnistuneesti.');
 			next();
 		});
@@ -383,19 +362,28 @@ function removeAuthKey(key) {
 	return (function(req, res, next) {
 		var authKey = req.work[key];
 		if(!authKey) return next("removeAuthKey: missing: "+ key);
-		util.log("removeAuthKey: Removing authKey for " + authKey);
-		activation.remove(authKey, function(err, key) {
-			if(err) return next('removeAuthKey: '+err);
-			util.log("removeAuthKey: authKey removed.");
-			delete req.work.authKey;
-			next();
+		req.on('end', function() {
+			util.log("removeAuthKey: Removing authKey for " + authKey);
+			activation.remove(authKey, function(err, key) {
+				if(err) {
+					util.log('removeAuthKey: '+err);
+					return;
+				}
+				util.log("removeAuthKey: authKey removed.");
+				delete req.work.authKey;
+			});
 		});
+		next();
 	});
 }
 
 /* Send authKey using email */
-function sendEmailAuthKey() {
+function sendEmailAuthKey(soft) {
 	return (function(req, res, next) {
+		if(soft) {
+			if(!req.work.authKey) return next();
+			if(!req.work.email) return next();
+		}
 		emails.send('./templates/authKey-mail.txt', {'authKey':req.work.authKey, 'site':site_url},
 				{'subject':'Käyttäjätunnuksen vahvistus', 'to':req.work.email}, function(err) {
 			if(err) {
@@ -504,7 +492,20 @@ function delReg(key) {
 		if(!req.work[key]) return next(new TypeError("delReg: req.work.user_id was not prepared!"));
 		tables.reg.del().where({'game_id':req.work.game_id, 'user_id':req.work.user_id}).limit(1).do(function(err) {
 			if(err) return next(new WebError('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.', err));
-			req.flash('info', 'Teidät on nyt poistettu pelistä.');
+			req.flash('info', 'Pelivaraus on nyt poistettu.');
+			next();
+		});
+	});
+}
+
+/* Unregister player data from the game */
+function delPlayer() {
+	return (function(req, res, next) {
+		if(!req.work['game_id']) return next(new TypeError("delPlayer: req.work.game_id was not prepared!"));
+		if(!req.work['reg_id']) return next();
+		tables.player.del().where({'game_id':req.work.game_id, 'reg_id':req.work.reg_id}).limit(1).do(function(err) {
+			if(err) return next(new WebError('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.', err));
+			req.flash('info', 'Teidät on poistettu pelistä.');
 			next();
 		});
 	});
@@ -540,7 +541,7 @@ function prepPlayerData() {
 		if(!req.work['reg_id']) return next();
 		tables.player.select('*').where({'game_id':req.work.game_id, 'reg_id':req.work.reg_id}).limit(1).do(function(err, rows) {
 			if(err) return next(new WebError('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.', err));
-			if(!(rows && rows[0])) return next(new WebError('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.', err));
+			if(!(rows && rows[0])) return next();
 			req.work.player_id = rows[0]['player_id'];
 			req.work.player = rows[0];
 			next();
@@ -676,7 +677,7 @@ app.namespace('/game', function(){
 		});
 		
 		/* Handle registration request */
-		app.post('/reg', prepBodyEmail(), prepCurrentUserID(), addReg(), redirect('back'));
+		app.post('/reg', prepBodyEmail(), prepCurrentUserID(), addReg(), updateUserRegisteredToGame(), createAuthKey(), sendEmailAuthKey(true), redirect('back'));
 		
 		/* Handle unregistration request */
 		app.get('/unreg', checkAuth(), updateUserRegisteredToGame(), prepPlayerData(), function(req, res){
@@ -684,7 +685,7 @@ app.namespace('/game', function(){
 		});
 		
 		/* Handle unregistration request */
-		app.post('/unreg', prepBodyEmail(), checkAuth(), prepCurrentUserID(), delReg(), redirect('back'));
+		app.post('/unreg', prepBodyEmail(), checkAuth(), prepCurrentUserID(), delPlayer(), delReg(), redirect('back'));
 		
 		/* Handle unregistration request */
 		app.get('/setup', checkAuth(), updateUserRegisteredToGame(), prepPlayerData(), function(req, res){

@@ -1,6 +1,6 @@
 Hei,
 
-Tämä on vahvistuspyyntö ilmoittautumisesta seuraavaan Freeciv-peliimme.
+Tämä on vahvistuspyyntö ilmoittautumisesta Freeciv-peliimme.
 
 Voitte vahvistaa osallistumisenne helposti osoitteessa:
 
@@ -12,7 +12,7 @@ päiväyksestä kuluen.
 PS: Saitte tämän viestin koska te tai joku muu on ilmoittautunut osoitteellanne 
 palvelussamme. Jos ette ole itse tehneet tätä ilmoitusta, voitte jättää tämän 
 viestin huomiotta tai käydä yllä olevassa osoitteessa perumassa 
-ilmoittautuminen.
+ilmoittautumisen.
 
 -- 
 Suomen Freeciv-pelaajat,
