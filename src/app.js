@@ -387,16 +387,20 @@ function sendEmailAuthKey(soft) {
 			}
 			emails.send('./templates/authKey-mail.txt', {'authKey':req.work.authKey, 'site':site_url},
 					{'subject':'Käyttäjätunnuksen vahvistus', 'to':req.work.email}, function(err) {
-				if(err) {
-					util.log('sendEmailAuthKey: Error: ' + err);
-					req.flash('error', 'Vahvistusviestin lähetys epäonnistui.');
-				} else {
-					req.flash('info', 'Vahvistusviesti lähetetty onnistuneesti.');
+				try {
+					if(err) {
+						util.log('sendEmailAuthKey: Error: ' + err);
+						req.flash('error', 'Vahvistusviestin lähetys epäonnistui.');
+					} else {
+						req.flash('info', 'Vahvistusviesti lähetetty onnistuneesti.');
+					}
+					next();
+				} catch(e){
+					next(e);
 				}
-				next();
 			});
 		} catch(e) {
-			next(e);
+			util.log("Error: " + e);
 		}
 	});
 }
