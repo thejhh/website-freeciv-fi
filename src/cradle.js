@@ -13,5 +13,6 @@ var config = require('./config.js'),
 	_lib = module.exports || {};
 
 _lib.database = (function(name) {
+	console.log( "_db_config = " + require('sys').inspect(_db_config) );
 	return _con.database(name);
 });

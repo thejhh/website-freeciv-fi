@@ -8,6 +8,6 @@ var cradle = require('./cradle.js'),
 
 /* Databases */
 databases.activations = cradle.database('freeciv-activations');
-databases.sessions = cradle.database('freeciv-sessions');
+//databases.sessions = cradle.database('freeciv-sessions');
 
 /* EOF */

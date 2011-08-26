@@ -20,8 +20,8 @@ tables.user.insert({'email':email}, function(err, user_id) {
 		if(err) return do_error(err);
 		
 		var options = {
-			host: 'localhost',
-			port: 3000,
+			host: 'game.freeciv.fi',
+			port: 3001,
   			path: '/login/reset',
 			method: 'POST',
 			headers: {'content-type':'application/x-www-form-urlencoded'}
