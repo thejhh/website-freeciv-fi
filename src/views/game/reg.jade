@@ -26,17 +26,7 @@ p
 	b Päivitys: 
 	| Varmistusviestit on lähetetty 26.08.2011 noin kello 11:00-13:00. Tarkista sähköpostisi!
 
-hr
-table
-	caption Pelaajat
-	tr
-		th Kansa
-		th Hallitsija
-	- each player, i in work.players
-		tr
-			td= player.nation
-			td= player.name
-#ilmo
+div(class='reg')
 	form(method='post', action='reg')
 		fieldset
 			legend Otteluun ilmoittautuminen
@@ -98,6 +88,16 @@ table
 			div(class='small')
 				hr
 				| Käytämme sähköpostiosoitetta ainoastaan tämän verkkopalvelun käyttäjätunnuksena ja ajankohtaisten tiedotteiden lähettämiseen. Emme julkaise tai levitä osoitetta edelleen.
+table
+	caption Pelaajat
+	tr
+		th Kansa
+		th Hallitsija
+	- each player, i in work.players
+		tr
+			td= player.nation
+			td= player.name
+hr
 div(class='sponsors')
 	| Yhteistyössä mukana: 
 	br
