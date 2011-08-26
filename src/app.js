@@ -380,20 +380,24 @@ function removeAuthKey(key) {
 /* Send authKey using email */
 function sendEmailAuthKey(soft) {
 	return (function(req, res, next) {
-		if(soft) {
-			if(!req.work.authKey) return next();
-			if(!req.work.email) return next();
-		}
-		emails.send('./templates/authKey-mail.txt', {'authKey':req.work.authKey, 'site':site_url},
-				{'subject':'Käyttäjätunnuksen vahvistus', 'to':req.work.email}, function(err) {
-			if(err) {
-				util.log('sendEmailAuthKey: Error: ' + err);
-				req.flash('error', 'Vahvistusviestin lähetys epäonnistui.');
-			} else {
-				req.flash('info', 'Vahvistusviesti lähetetty onnistuneesti.');
+		try {
+			if(soft) {
+				if(!req.work.authKey) return next();
+				if(!req.work.email) return next();
 			}
-			next();
-		});
+			emails.send('./templates/authKey-mail.txt', {'authKey':req.work.authKey, 'site':site_url},
+					{'subject':'Käyttäjätunnuksen vahvistus', 'to':req.work.email}, function(err) {
+				if(err) {
+					util.log('sendEmailAuthKey: Error: ' + err);
+					req.flash('error', 'Vahvistusviestin lähetys epäonnistui.');
+				} else {
+					req.flash('info', 'Vahvistusviesti lähetetty onnistuneesti.');
+				}
+				next();
+			});
+		} catch(e) {
+			next(e);
+		}
 	});
 }
 
