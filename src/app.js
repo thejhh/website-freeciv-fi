@@ -170,7 +170,7 @@ app.param('authKey', function(req, res, next, id){
 						req.work.authKeyData = data;
 						req.work.user = rows[0];
 						req.work.user_id = data.user_id;
-						req.work.email = req.work.user,email;
+						req.work.email = req.work.user.email;
 					} catch(e) {
 						next(e);
 						return;
