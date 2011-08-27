@@ -31,7 +31,7 @@ div(class='reg')
 		fieldset
 			legend Otteluun ilmoittautuminen
 			| Nyt ilmoittautunut: 
-			b= (work.players < 126) ? work.players : 126
+			b= work.game_players
 			| &nbsp;/
 			b 126&nbsp;KPL
 			br
@@ -44,7 +44,7 @@ div(class='reg')
 				hr
 			- else
 				| Varapelaajia ilmoittautunut: 
-				b= work.players-126
+				b= work.spare_players
 				b &nbsp;KPL
 				br
 				hr

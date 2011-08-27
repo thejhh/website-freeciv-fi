@@ -567,7 +567,9 @@ function updateGameCount() {
 				try {
 					if(err) req.flash('error', "Tietokantayhteydessä tapahtui virhe: Sivulla voi olla vääriä tietoja.");
 					req.work.players = (rows && rows[0] && rows[0].count) || 0;
-					req.work.free_players = 126 - req.work.players;
+					req.work.free_players = (req.work.players >= 126) ? 0 : (126 - req.work.players);
+					req.work.spare_players = (req.work.players >= 126) ? req.work.players - 126 : 0;
+					req.work.game_players = (req.work.players >= 126) ? 126 : req.work.players;
 				} catch(e) {
 					util.log('updateGameCount: Exception: ' + e + ' [ignored]');
 				}
