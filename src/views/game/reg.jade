@@ -60,6 +60,13 @@ div(class='reg')
 				input(name='email')
 			br
 			- if(work.userRegisteredToGame)
+				- if(work.reg.number <= 126)
+					label Pelipaikka: 
+					= work.reg.number
+				- else
+					label Varasija: 
+					= work.reg.number - 126
+				br
 				label Kansalaisuus: 
 				- if(work.player)
 					= work.player.nation
