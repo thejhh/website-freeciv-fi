@@ -1,0 +1,6 @@
+p Pelin aloittamiseen tarvittava LUA-skripti:
+
+pre
+	- each player, i in work.players
+		| lua create_player("!{player.name}", find.nation_type("!{player.nation}"));
+		| aitoggle !{player.name}
