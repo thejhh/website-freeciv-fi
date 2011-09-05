@@ -23,7 +23,9 @@ CREATE TABLE `reg` (
 	reg_id      BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	game_id     INT UNSIGNED NOT NULL DEFAULT 0,
 	user_id     INT UNSIGNED NOT NULL DEFAULT 0,
+    number      INT UNSIGNED NOT NULL DEFAULT 0,
 	UNIQUE KEY `user_game_key` (user_id,game_id),
+	UNIQUE KEY `game_number_key` (game_id,number),
 	PRIMARY KEY(reg_id)) CHARACTER SET utf8;
 
 /* Players */

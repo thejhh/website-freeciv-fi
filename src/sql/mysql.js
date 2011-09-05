@@ -58,6 +58,7 @@ _lib.select = (function(table, options, callback) {
 	try {
 		var client = _client,
 		    what = options.what || ['*'],
+		    leftjoin = options.leftjoin || [],
 		    keys=[],
 		    values=[],
 		    options = options || {},
@@ -70,6 +71,7 @@ _lib.select = (function(table, options, callback) {
 			values.push(v);
 		});
 		query = 'SELECT ' + what.join(', ') + ' FROM `'+table+'`';
+		if(leftjoin.length !== 0) query += ' LEFT JOIN ' + leftjoin.join(' LEFT JOIN ');
 		if(keys.length !== 0) query += ' WHERE `' + keys.join('` = ? AND `') + '` = ?';
 		if(limit) query += ' LIMIT ' + limit;
 		util.log("Executing query for sql-mysql.js:select("+sys.inspect(table)+", "+sys.inspect(options.where)+"): " + query);

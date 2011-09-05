@@ -13,9 +13,14 @@ _lib.table = (function(table) {
 		var options = {'what': []};
 		foreach(arguments).do(function(v) { options.what.push(v); });
 		if(options.what.length === 0) options.what.push('*');
+		options.leftjoin = [];
 		return ({
 			'limit':function(limit) {
 				options.limit = parseInt(limit, 10);
+				return this;
+			},
+			'leftjoin':function() {
+				foreach(arguments).do(function(v) { options.leftjoin.push(v); });
 				return this;
 			},
 			'where':function(where) {

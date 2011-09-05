@@ -91,10 +91,12 @@ div(class='reg')
 table
 	caption Pelaajat
 	tr
+		th Pelipaikka
 		th Kansa
 		th Hallitsija
 	- each player, i in work.players
 		tr
+			td= player.number
 			td= player.nation
 			td= player.name
 hr
