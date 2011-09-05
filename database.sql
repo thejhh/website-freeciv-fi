@@ -45,7 +45,7 @@ CREATE TABLE auth (
 	game_id     INT UNSIGNED NOT NULL DEFAULT 0,
 	user_id     INT UNSIGNED NOT NULL DEFAULT 0,
 	name varchar(32) default NULL,
-	password varchar(32) default NULL,
+	password varchar(255) default NULL,
 	email varchar(128) default NULL,
 	createtime int(11) default NULL,
 	accesstime int(11) default NULL,

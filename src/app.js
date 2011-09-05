@@ -958,6 +958,11 @@ app.namespace('/game', function(){
 		});
 		
 		/* Game page */
+		app.get('/lua', updateUserRegisteredToGame(), prepPlayerData(), updateGameCount(), updateGamePlayerList(), function(req, res){
+			res.render('game/lua', {'title': 'Ottelu '+req.work.game.name, players:req.work.players, 'free_players':req.work.free_players});
+		});
+		
+		/* Game page */
 		app.get('/reg', updateUserRegisteredToGame(), prepPlayerData(), updateGameCount(), updateGamePlayerList(), function(req, res){
 			res.render('game/reg', {'title':'Ottelu '+req.work.game.name});
 		});
