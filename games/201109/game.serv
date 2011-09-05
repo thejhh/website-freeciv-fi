@@ -2,7 +2,7 @@ rulesetdir
 rfcstyle
 normal
 set size 40
-set topology WRAPX|WRAPY
+set topology WRAPX|WRAPY|ISO
 set generator FRACTAL
 set citymindist 3
 set startpos VARIABLE
