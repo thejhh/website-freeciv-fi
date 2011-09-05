@@ -57,22 +57,23 @@ _lib.insert = (function(table, data, callback) {
 _lib.select = (function(table, options, callback) {
 	try {
 		var client = _client,
+		    options = options || {},
 		    what = options.what || ['*'],
 		    leftjoin = options.leftjoin || [],
 		    keys=[],
 		    values=[],
-		    options = options || {},
 			where = options.where || {},
 			limit = options.limit,
+			short_table = options.short_table || 't',
 		    query;
 		if(!client) return callback("!client");
 		foreach(options.where).do(function(v, k) {
 			keys.push(k);
 			values.push(v);
 		});
-		query = 'SELECT ' + what.join(', ') + ' FROM `'+table+'`';
+		query = 'SELECT ' + what.join(', ') + ' FROM `'+table+'` AS ' + short_table;
 		if(leftjoin.length !== 0) query += ' LEFT JOIN ' + leftjoin.join(' LEFT JOIN ');
-		if(keys.length !== 0) query += ' WHERE `' + keys.join('` = ? AND `') + '` = ?';
+		if(keys.length !== 0) query += ' WHERE ' + keys.join(' = ? AND `') + ' = ?';
 		if(limit) query += ' LIMIT ' + limit;
 		util.log("Executing query for sql-mysql.js:select("+sys.inspect(table)+", "+sys.inspect(options.where)+"): " + query);
 		client.query(

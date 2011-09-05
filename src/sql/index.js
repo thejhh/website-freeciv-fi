@@ -19,6 +19,10 @@ _lib.table = (function(table) {
 				options.limit = parseInt(limit, 10);
 				return this;
 			},
+			'as':function(short_table) {
+				options.short_table = short_table;
+				return this;
+			},
 			'leftjoin':function() {
 				foreach(arguments).do(function(v) { options.leftjoin.push(v); });
 				return this;
