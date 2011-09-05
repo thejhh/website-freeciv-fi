@@ -530,6 +530,7 @@ function sendEmailAuthKey(soft) {
 
 /* Update information about registration in current game for current user */
 function updateUserRegisteredToGame() {
+	var undefined;
 	return (function(req, res, next) {
 		try {
 			var game_id = req.work.game_id,
@@ -539,7 +540,7 @@ function updateUserRegisteredToGame() {
 			tables.reg.select('*').where({'game_id':game_id, 'user_id':user_id}).limit(1).do(function(err, rows) {
 				try {
 					if(err) throw err;
-					req.work.userRegisteredToGame = null;
+					req.work.userRegisteredToGame = undefined;
 					if(rows && rows[0] && rows[0].reg_id) {
 						req.work.userRegisteredToGame = user_id;
 						req.work.reg_id = rows[0].reg_id;

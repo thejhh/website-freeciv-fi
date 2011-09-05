@@ -73,7 +73,7 @@ _lib.select = (function(table, options, callback) {
 		});
 		query = 'SELECT ' + what.join(', ') + ' FROM `'+table+'` AS ' + short_table;
 		if(leftjoin.length !== 0) query += ' LEFT JOIN ' + leftjoin.join(' LEFT JOIN ');
-		if(keys.length !== 0) query += ' WHERE ' + keys.join(' = ? AND `') + ' = ?';
+		if(keys.length !== 0) query += ' WHERE ' + keys.join(' = ? AND ') + ' = ?';
 		if(limit) query += ' LIMIT ' + limit;
 		util.log("Executing query for sql-mysql.js:select("+sys.inspect(table)+", "+sys.inspect(options.where)+"): " + query);
 		client.query(
