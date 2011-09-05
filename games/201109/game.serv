@@ -1,0 +1,16 @@
+rulesetdir
+rfcstyle
+normal
+set size 40
+set topology WRAPX|WRAPY
+set generator FRACTAL
+set citymindist 3
+set startpos VARIABLE
+set tinyisles enabled
+set startunits ccwwx
+set saveturns 1
+set separatepoles disabled
+set techpenalty 0
+set dispersion 3
+set timeout 86400
+set barbarians=DISABLED

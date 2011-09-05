@@ -37,4 +37,30 @@ CREATE TABLE `player` (
 	UNIQUE KEY `game_name_key` (game_id,name),
 	PRIMARY KEY(player_id)) CHARACTER SET utf8;
 
+/* Freeciv gameserver table */
+CREATE TABLE auth (
+	auth_id     int(11) NOT NULL auto_increment,
+	game_id     INT UNSIGNED NOT NULL DEFAULT 0,
+	user_id     INT UNSIGNED NOT NULL DEFAULT 0,
+	name varchar(32) default NULL,
+	password varchar(32) default NULL,
+	email varchar(128) default NULL,
+	createtime int(11) default NULL,
+	accesstime int(11) default NULL,
+	address varchar(255) default NULL,
+	createaddress varchar(15) default NULL,
+	logincount int(11) default '0',
+	PRIMARY KEY  (auth_id),
+	UNIQUE KEY name (name)
+) CHARACTER SET utf8;
+
+/* Freeciv server login log */
+CREATE TABLE loginlog (
+   loginlog_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+   name    VARCHAR(255) default NULL,
+   logintime   int(11) default NULL,
+   address     VARCHAR(255) default NULL,
+   succeed     enum('S','F') default 'S',
+   PRIMARY KEY (loginlog_id)) CHARACTER SET utf8;
+
 /* EOF */

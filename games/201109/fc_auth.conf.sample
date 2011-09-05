@@ -1,0 +1,16 @@
+; Configuration file for Freeciv server player authentication
+
+[auth]
+; How to connect MySQL server
+host="localhost"
+port="3306" ; This is handled as string!
+user="freeciv"
+password=""
+
+; What database to use in MySQL server
+database="freeciv"
+
+; Table names
+table="auth"
+login_table="loginlog"
+
