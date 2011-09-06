@@ -17,7 +17,7 @@ function do_sendmail(to_email) {
 	    {
 	        sender: 'Jaakko Heusala <jheusala@freeciv.fi>',
 	        to:to_email,
-	        subject:'Aloitamme uutta Freeciv-peliä',
+	        subject:'Uusi Freeciv-pelimme on alkanut',
 	        body:msg_body
 	    },
 	    // callback function

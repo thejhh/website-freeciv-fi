@@ -1,20 +1,39 @@
 Hei,
 
-Osallistuitte muutama vuosi sitten Freeciv-peliimme ja sen johdosta otin nyt 
-uudelleen yhteyttä, sillä olemme aloittamassa uutta peliä.
+Uusi Syyskuun Freeciv-pelimme on viimein alkanut. Mukana on historiallinen 126 
+pelaajaa!
 
-Uuteen peliin voi ilmoittautua osoitteessa:
+Ensimmäinen vuoro on varmuuden vuoksi normaalia pidempi ja kestää keskiviikkoon 
+klo 20:00 asti, jotta kaikki ehtivät varmasti mukaan.
+
+Pelipalvelimen käyttäjätunnuksenne ja palvelimen tiedot löydätte 
+sisäänkirjautumisen jälkeen osoitteesta:
 
 	http://game.freeciv.fi/
 
-Freecivin uusin versio on kehittynyt erityisesti pitkiä pelejä varten ja tänä 
-vuonna yksi suuri muutos onkin pelaajien määrä: mukaan voidaan ottaa jopa 126 
-pelaajaa, kun aikaisemmin palvelin tuki vain 30 pelaajaa.
+Unohtuneen salasanan voi vaihtaa osoitteessa:
 
-PS: Saitte tämän viestin koska olette aikaisemmin osallistuneet peleihimme tai 
-rekisteröityneet wikiimme. Jos ette halua vastaanottaa tällaisia tiedotteita, 
-voitte joko pyytää minua poistamaan wikitunnuksenne tai käydä itse poistamassa 
-sen palvelussa.
+	http://game.freeciv.fi/login/reset
+
+Pelaamiseen tarvitset Freeciv 2.3.0 -ohjelman osoitteesta:
+
+	http://www.freeciv.org
+
+Mikäli teillä on ongelmia pelin aloittamisessa, kysykää asiasta joko 
+vastaamalla tähän viestiin tai osallistumalla keskusteluihin muiden pelaajien 
+kanssa Facebookissa tai IRC:ssä.
+
+Pelin tiedotteita kerromme pääasiassa Facebookissa ja IRC:ssä:
+
+Tämän ottelun tapahtuma:
+
+	http://www.facebook.com/event.php?eid=247270245303591
+
+Facebook ryhmämme: 
+
+	http://www.facebook.com/group.php?gid=143021456183
+
+IRCNet: #freeciv.fi
 
 -- 
 Freeciv.fi:n ylläpitäjä,
