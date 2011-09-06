@@ -774,6 +774,32 @@ function prepPlayerData() {
 	});
 }
 
+/* Prepare data to request.work.reg */
+function prepPlayerAuthData() {
+	return (function(req, res, next) {
+		try {
+			if(!req.work['game_id']) throw new TypeError("prepPlayerAuthData: req.work.game_id was not prepared!");
+			var user_id = req.session && req.session.user && req.session.user.user_id;
+			tables.auth.select('*').where({'game_id':req.work.game_id, 'user_id':user_id}).limit(1).do(function(err, rows) {
+				try {
+					if(err) throw new WebError('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.', err);
+					if(!(rows && rows[0])) throw "";
+					req.work.auth_id = rows[0]['auth_id'];
+					req.work.auth = rows[0];
+				} catch(e) {
+					if(e) next(e);
+					else next();
+					return;
+				}
+				next();
+			});
+		} catch(e) {
+			if(e) next(e);
+			else next();
+		}
+	});
+}
+
 /* Setup player */
 function setupPlayer(key) {
 	return (function(req, res, next) {
@@ -953,17 +979,17 @@ app.namespace('/game', function(){
 		});
 		
 		/* Game page */
-		app.get('/index', updateUserRegisteredToGame(), prepPlayerData(), updateGameCount(), updateGamePlayerList(), function(req, res){
+		app.get('/index', updateUserRegisteredToGame(), prepPlayerData(), prepPlayerAuthData(), updateGameCount(), updateGamePlayerList(), function(req, res){
 			res.render('game/reg', {'title': 'Ottelu '+req.work.game.name, players:req.work.players, 'free_players':req.work.free_players});
 		});
 		
 		/* Game page */
-		app.get('/lua', updateUserRegisteredToGame(), prepPlayerData(), updateGameCount(), updateGamePlayerList(), function(req, res){
+		app.get('/lua', updateUserRegisteredToGame(), prepPlayerData(), prepPlayerAuthData(), updateGameCount(), updateGamePlayerList(), function(req, res){
 			res.render('game/lua', {'title': 'Ottelu '+req.work.game.name, players:req.work.players, 'free_players':req.work.free_players});
 		});
 		
 		/* Game page */
-		app.get('/reg', updateUserRegisteredToGame(), prepPlayerData(), updateGameCount(), updateGamePlayerList(), function(req, res){
+		app.get('/reg', updateUserRegisteredToGame(), prepPlayerData(), prepPlayerAuthData(), updateGameCount(), updateGamePlayerList(), function(req, res){
 			res.render('game/reg', {'title':'Ottelu '+req.work.game.name});
 		});
 		
@@ -971,7 +997,7 @@ app.namespace('/game', function(){
 		app.post('/reg', prepBodyEmail(), prepCurrentUserID(), addReg(), updateUserRegisteredToGame(), createAuthKey(), sendEmailAuthKey(true), redirect('back'));
 		
 		/* Handle unregistration request */
-		app.get('/unreg', checkAuth(), updateUserRegisteredToGame(), prepPlayerData(), function(req, res){
+		app.get('/unreg', checkAuth(), updateUserRegisteredToGame(), prepPlayerData(), prepPlayerAuthData(), function(req, res){
 			res.render('game/unreg', {'title':'Poista pelaaja - Ottelu '+req.work.game.name});
 		});
 		
@@ -979,7 +1005,7 @@ app.namespace('/game', function(){
 		app.post('/unreg', prepBodyEmail(), checkAuth(), prepCurrentUserID(), delPlayer(), delReg(), redirect('back'));
 		
 		/* Handle unregistration request */
-		app.get('/setup', checkAuth(), updateUserRegisteredToGame(), prepPlayerData(), prepFreecivData(), function(req, res){
+		app.get('/setup', checkAuth(), updateUserRegisteredToGame(), prepPlayerData(), prepPlayerAuthData(), prepFreecivData(), function(req, res){
 			res.render('game/setup', {'title':'Muokkaa pelaajan tietoja - Ottelu '+req.work.game.name});
 		});
 		

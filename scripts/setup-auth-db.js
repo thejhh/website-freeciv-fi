@@ -36,12 +36,10 @@ tables.reg.select('r.reg_id AS reg_id',
 		if(!number) return;
 		if(!( (number >= 1) && (number <= 126) )) return;
 		if(!reg_id) return;
-		/*
 		tables.auth.insert({'game_id':game_id, 'user_id':user_id, 'name':username}, function(err3, auth_id) {
 			if(err3) console.log('Error: ' + err3);
 			else console.log('Added username #' + auth_id);
 		});
-		*/
 	});
 });
 

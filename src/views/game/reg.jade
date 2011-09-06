@@ -78,6 +78,20 @@ div(class='reg')
 					= work.player.name
 				- else
 					| Valitsematta
+				hr
+				label Palvelin: 
+				|  
+				b mars.v2.fi
+				|  (portti 
+				b 5556
+				| )
+				br
+				label Palvelimen käyttäjätunnus: 
+				- if(work.auth)
+					= work.auth.name
+				- else
+					| Ei määritelty
+				hr
 				br
 			- if(work.userRegisteredToGame)
 				a(href='setup', class='button positive')
