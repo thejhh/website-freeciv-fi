@@ -46,14 +46,15 @@ CREATE TABLE auth (
 	user_id     INT UNSIGNED NOT NULL DEFAULT 0,
 	name varchar(32) default NULL,
 	password varchar(255) default NULL,
-	email varchar(128) default NULL,
+	email varchar(255) default NULL,
 	createtime int(11) default NULL,
 	accesstime int(11) default NULL,
 	address varchar(255) default NULL,
 	createaddress varchar(15) default NULL,
 	logincount int(11) default '0',
 	PRIMARY KEY  (auth_id),
-	UNIQUE KEY name (name)
+	UNIQUE KEY game_name_key (game_id,name),
+	UNIQUE KEY game_user_key (game_id,user_id)
 ) CHARACTER SET utf8;
 
 /* Freeciv server login log */
