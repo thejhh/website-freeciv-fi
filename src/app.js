@@ -652,7 +652,7 @@ function addReg(key) {
 		try {
 			if(!req.work['game_id']) throw new TypeError("addReg: req.work.game_id was not prepared!");
 			if(!req.work[key]) throw new TypeError("addReg: req.work.user_id was not prepared!");
-			tables.reg.select('MAX(number)+1 AS number').do(function(err, data) {
+			tables.reg.select('MAX(number)+1 AS number').where({'game_id':req.work.game_id}).do(function(err, data) {
 				try {
 					if(err) throw new WebError('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.', err);
 					var number = data && data[0] && data[0].number;
