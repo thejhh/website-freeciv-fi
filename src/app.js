@@ -621,7 +621,7 @@ function prepCurrentUserID(key) {
 				throw "";
 			}
 			
-			if(!req.work[key]) throw new TypeError("addReg: req.work."+key+" was not prepared!");
+			if(!req.work[key]) throw new TypeError("prepCurrentUserID: req.work."+key+" was not prepared!");
 			
 			// Check if user has registered already but just not logged in, and tell him that.
 			
@@ -652,15 +652,23 @@ function addReg(key) {
 		try {
 			if(!req.work['game_id']) throw new TypeError("addReg: req.work.game_id was not prepared!");
 			if(!req.work[key]) throw new TypeError("addReg: req.work.user_id was not prepared!");
-			tables.reg.insert({'game_id':req.work.game_id, 'user_id':req.work.user_id}, function(err) {
+			tables.reg.select('MAX(number)+1 AS number').do(function(err, data) {
 				try {
 					if(err) throw new WebError('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.', err);
-					req.flash('info', 'Teidät on nyt lisätty peliin.');
+					var number = data && data[0] && data[0].number;
+					tables.reg.insert({'game_id':req.work.game_id, 'user_id':req.work.user_id, 'number':number}, function(err) {
+						try {
+							if(err) throw new WebError('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.', err);
+							req.flash('info', 'Teidät on nyt lisätty peliin.');
+						} catch(e) {
+							next(e);
+							return;
+						}
+						next();
+					});
 				} catch(e) {
 					next(e);
-					return;
 				}
-				next();
 			});
 		} catch(e) {
 			next(e);
