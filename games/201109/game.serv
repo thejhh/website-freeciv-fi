@@ -5,7 +5,7 @@ set size 40
 set topology WRAPX|WRAPY|ISO
 set generator FRACTAL
 set citymindist 3
-set startpos VARIABLE
+#set startpos VARIABLE
 set tinyisles enabled
 set startunits ccwwx
 set saveturns 1
@@ -14,3 +14,382 @@ set techpenalty 0
 set dispersion 3
 set timeout 86400
 set barbarians=DISABLED
+
+# Player 1
+lua create_player("Doctor", find.nation_type("British"));
+aitoggle Doctor
+# Player 2
+lua create_player("Aslak", find.nation_type("Sami"));
+aitoggle Aslak
+# Player 3
+lua create_player("Tag", find.nation_type("Mongol"));
+aitoggle Tag
+# Player 4
+lua create_player("Sparrow MacApple", find.nation_type("Scottish"));
+aitoggle Sparrow MacApple
+# Player 5
+lua create_player("Noutaja", find.nation_type("Brazilian"));
+aitoggle Noutaja
+# Player 6
+lua create_player("Albert Camille Vital", find.nation_type("Malagasy"));
+aitoggle Albert Camille Vital
+# Player 7
+lua create_player("Tatti", find.nation_type("Korean"));
+aitoggle Tatti
+# Player 8
+lua create_player("Eva Aariak", find.nation_type("Inuit"));
+aitoggle Eva Aariak
+# Player 9
+lua create_player("Sulla", find.nation_type("Italian"));
+aitoggle Sulla
+# Player 10
+lua create_player("Usagi Yojimbo", find.nation_type("Japanese"));
+aitoggle Usagi Yojimbo
+# Player 11
+lua create_player("Temmi", find.nation_type("Wuerttembergian"));
+aitoggle Temmi
+# Player 12
+lua create_player("ZeroCool", find.nation_type("Hacker"));
+aitoggle ZeroCool
+# Player 13
+lua create_player("LksbyJ", find.nation_type("North Korean"));
+aitoggle LksbyJ
+# Player 14
+lua create_player("Amaniampon", find.nation_type("Ashanti"));
+aitoggle Amaniampon
+# Player 15
+lua create_player("Alexandros", find.nation_type("Macedon"));
+aitoggle Alexandros
+# Player 16
+lua create_player("Joana III Albretekoa", find.nation_type("Basque"));
+aitoggle Joana III Albretekoa
+# Player 17
+lua create_player("Szent István", find.nation_type("Hungarian"));
+aitoggle Szent István
+# Player 18
+lua create_player("FinDefaulted", find.nation_type("UN"));
+aitoggle FinDefaulted
+# Player 19
+lua create_player("Mireya Moscoso", find.nation_type("Panamanian"));
+aitoggle Mireya Moscoso
+# Player 20
+lua create_player("Gian Galeazzo Visconti", find.nation_type("Milanese"));
+aitoggle Gian Galeazzo Visconti
+# Player 21
+lua create_player("Bono", find.nation_type("Irish"));
+aitoggle Bono
+# Player 22
+lua create_player("Tinerfe", find.nation_type("Guanche"));
+aitoggle Tinerfe
+# Player 23
+lua create_player("Phyrex", find.nation_type("Sumerian"));
+aitoggle Phyrex
+# Player 24
+lua create_player("Flavius Aetius", find.nation_type("Western Roman"));
+aitoggle Flavius Aetius
+# Player 25
+lua create_player("Dimitrie Cantemir", find.nation_type("Moldovan"));
+aitoggle Dimitrie Cantemir
+# Player 26
+lua create_player("Muganzirwazza", find.nation_type("Ugandan"));
+aitoggle Muganzirwazza
+# Player 27
+lua create_player("Vabalathus", find.nation_type("Palmyrene"));
+aitoggle Vabalathus
+# Player 28
+lua create_player("Eshmunazar", find.nation_type("Phoenician"));
+aitoggle Eshmunazar
+# Player 29
+lua create_player("Vlad the Impaler", find.nation_type("Transylvanian"));
+aitoggle Vlad the Impaler
+# Player 30
+lua create_player("Fruela II", find.nation_type("Leonese"));
+aitoggle Fruela II
+# Player 31
+lua create_player("B'odga", find.nation_type("Otomi"));
+aitoggle B'odga
+# Player 32
+lua create_player("Redbad", find.nation_type("Frisian"));
+aitoggle Redbad
+# Player 33
+lua create_player("Mahtisika", find.nation_type("Pirate"));
+aitoggle Mahtisika
+# Player 34
+lua create_player("Mortadza Räximov", find.nation_type("Bashkir"));
+aitoggle Mortadza Räximov
+# Player 35
+lua create_player("Olenka Vasiljivts", find.nation_type("Czech"));
+aitoggle Olenka Vasiljivts
+# Player 36
+lua create_player("Ibrahim Baré Maïnassara", find.nation_type("Nigerien"));
+aitoggle Ibrahim Baré Maïnassara
+# Player 37
+lua create_player("Þiudahaþus", find.nation_type("Ostrogothic"));
+aitoggle Þiudahaþus
+# Player 38
+lua create_player("Esen", find.nation_type("Kalmyk"));
+aitoggle Esen
+# Player 39
+lua create_player("Syopaasi", find.nation_type("Norman"));
+aitoggle Syopaasi
+# Player 40
+lua create_player("Johnny Drama", find.nation_type("Viking"));
+aitoggle Johnny Drama
+# Player 41
+lua create_player("paveq", find.nation_type("Knights Templar"));
+aitoggle paveq
+# Player 42
+lua create_player("Edwin", find.nation_type("Northumbrian"));
+aitoggle Edwin
+# Player 43
+lua create_player("Zulu", find.nation_type("Zulu"));
+aitoggle Zulu
+# Player 44
+lua create_player("Kaaos", find.nation_type("Roman"));
+aitoggle Kaaos
+# Player 45
+lua create_player("Aladobix", find.nation_type("Gallic"));
+aitoggle Aladobix
+# Player 46
+lua create_player("Kussa Hopotiti", find.nation_type("Estonian"));
+aitoggle Kussa Hopotiti
+# Player 47
+lua create_player("Ali Hassan", find.nation_type("Emirati"));
+aitoggle Ali Hassan
+# Player 48
+lua create_player("Pçteris Radziòð", find.nation_type("Latvian"));
+aitoggle Pçteris Radziòð
+# Player 49
+lua create_player("Adolf", find.nation_type("Israeli"));
+aitoggle Adolf
+# Player 50
+lua create_player("Chamis", find.nation_type("Ohlone"));
+aitoggle Chamis
+# Player 51
+lua create_player("Josef Bürckel", find.nation_type("Lorrain"));
+aitoggle Josef Bürckel
+# Player 52
+lua create_player("Hazuki", find.nation_type("Vampire"));
+aitoggle Hazuki
+# Player 53
+lua create_player("Ricky Martin", find.nation_type("Puerto Rican"));
+aitoggle Ricky Martin
+# Player 54
+lua create_player("Perdurado", find.nation_type("Assyrian"));
+aitoggle Perdurado
+# Player 55
+lua create_player("Althir", find.nation_type("Mayan"));
+aitoggle Althir
+# Player 56
+lua create_player("Canobaná", find.nation_type("Taino"));
+aitoggle Canobaná
+# Player 57
+lua create_player("Norm Kirk", find.nation_type("New Zealand"));
+aitoggle Norm Kirk
+# Player 58
+lua create_player("Sho Hashi", find.nation_type("Ryukyuan"));
+aitoggle Sho Hashi
+# Player 59
+lua create_player("Zabel I", find.nation_type("Armenian"));
+aitoggle Zabel I
+# Player 60
+lua create_player("Sa'n Teni", find.nation_type("Mi'kmaq"));
+aitoggle Sa'n Teni
+# Player 61
+lua create_player("Patrik Selin", find.nation_type("Finnish"));
+aitoggle Patrik Selin
+# Player 62
+lua create_player("Ugyen Wangchuck", find.nation_type("Bhutanese"));
+aitoggle Ugyen Wangchuck
+# Player 63
+lua create_player("Visukinttu", find.nation_type("Cypriot"));
+aitoggle Visukinttu
+# Player 64
+lua create_player("Chulalongkorn", find.nation_type("Thai"));
+aitoggle Chulalongkorn
+# Player 65
+lua create_player("Tommy Seebach", find.nation_type("Apache"));
+aitoggle Tommy Seebach
+# Player 66
+lua create_player("Vaj Tsoov Loom", find.nation_type("Miao"));
+aitoggle Vaj Tsoov Loom
+# Player 67
+lua create_player("Yusof bin Ishak", find.nation_type("Singaporean"));
+aitoggle Yusof bin Ishak
+# Player 68
+lua create_player("Piikkikypärä", find.nation_type("Prussian"));
+aitoggle Piikkikypärä
+# Player 69
+lua create_player("Jpa", find.nation_type("Tatar"));
+aitoggle Jpa
+# Player 70
+lua create_player("Giant Sheep", find.nation_type("Gaelic"));
+aitoggle Giant Sheep
+# Player 71
+lua create_player("Shiundu", find.nation_type("Kenyan"));
+aitoggle Shiundu
+# Player 72
+lua create_player("Sergey Shoygu", find.nation_type("Tuvan"));
+aitoggle Sergey Shoygu
+# Player 73
+lua create_player("Hinrich de Lööw", find.nation_type("Hanseatic"));
+aitoggle Hinrich de Lööw
+# Player 74
+lua create_player("Nikolai Yadrintsev", find.nation_type("Siberian"));
+aitoggle Nikolai Yadrintsev
+# Player 75
+lua create_player("Olosohpa", find.nation_type("Micronesian"));
+aitoggle Olosohpa
+# Player 76
+lua create_player("Fuad Chehab", find.nation_type("Lebanese"));
+aitoggle Fuad Chehab
+# Player 77
+lua create_player("Crow Dog", find.nation_type("Sioux"));
+aitoggle Crow Dog
+# Player 78
+lua create_player("Manuel Carrascalão", find.nation_type("East Timorese"));
+aitoggle Manuel Carrascalão
+# Player 79
+lua create_player("EvilBJ", find.nation_type("Swedish"));
+aitoggle EvilBJ
+# Player 80
+lua create_player("Fatmir Sejdiu", find.nation_type("Kosovar"));
+aitoggle Fatmir Sejdiu
+# Player 81
+lua create_player("Mon Laong Shun", find.nation_type("Chinese"));
+aitoggle Mon Laong Shun
+# Player 82
+lua create_player("Perak", find.nation_type("Malaysian"));
+aitoggle Perak
+# Player 83
+lua create_player("Lucius", find.nation_type("Etruscan"));
+aitoggle Lucius
+# Player 84
+lua create_player("Michael Somare", find.nation_type("Papuan"));
+aitoggle Michael Somare
+# Player 85
+lua create_player("Punainen Komentaja", find.nation_type("Californian"));
+aitoggle Punainen Komentaja
+# Player 86
+lua create_player("Jugasu", find.nation_type("Tupi"));
+aitoggle Jugasu
+# Player 87
+lua create_player("Señor Mustache", find.nation_type("Nicaraguan"));
+aitoggle Señor Mustache
+# Player 88
+lua create_player("Salvatore Giuliano", find.nation_type("Sicilian"));
+aitoggle Salvatore Giuliano
+# Player 89
+lua create_player("Daih", find.nation_type("Indonesian"));
+aitoggle Daih
+# Player 90
+lua create_player("Nugi Túxe", find.nation_type("Tairona"));
+aitoggle Nugi Túxe
+# Player 91
+lua create_player("Henryk Brodaty", find.nation_type("Silesian"));
+aitoggle Henryk Brodaty
+# Player 92
+lua create_player("Mölli", find.nation_type("Polynesian"));
+aitoggle Mölli
+# Player 93
+lua create_player("Richard Squires", find.nation_type("Newfoundland"));
+aitoggle Richard Squires
+# Player 94
+lua create_player("nonnii The Giant", find.nation_type("Chechen"));
+aitoggle nonnii The Giant
+# Player 95
+lua create_player("Mohammed Ameziane", find.nation_type("Riffian"));
+aitoggle Mohammed Ameziane
+# Player 96
+lua create_player("Mandonio", find.nation_type("Iberian"));
+aitoggle Mandonio
+# Player 97
+lua create_player("Conan The Destroyer", find.nation_type("Barbarian"));
+aitoggle Conan The Destroyer
+# Player 98
+lua create_player("Timo Soini", find.nation_type("European"));
+aitoggle Timo Soini
+# Player 99
+lua create_player("Bob", find.nation_type("Jamaican"));
+aitoggle Bob
+# Player 100
+lua create_player("Peeka", find.nation_type("American"));
+aitoggle Peeka
+# Player 101
+lua create_player("DotC", find.nation_type("Hittite"));
+aitoggle DotC
+# Player 102
+lua create_player("Ethan A. Hitchcock", find.nation_type("Vermont"));
+aitoggle Ethan A. Hitchcock
+# Player 103
+lua create_player("Montza", find.nation_type("Afghani"));
+aitoggle Montza
+# Player 104
+lua create_player("Oliver Dawson", find.nation_type("Saxon"));
+aitoggle Oliver Dawson
+# Player 105
+lua create_player("LaRue Parker", find.nation_type("Hasinay"));
+aitoggle LaRue Parker
+# Player 106
+lua create_player("Penaia Ganilau", find.nation_type("Fijian"));
+aitoggle Penaia Ganilau
+# Player 107
+lua create_player("J-P", find.nation_type("Vietnamese"));
+aitoggle J-P
+# Player 108
+lua create_player("Vialeea", find.nation_type("Dryad"));
+aitoggle Vialeea
+# Player 109
+lua create_player("Leon", find.nation_type("Russian"));
+aitoggle Leon
+# Player 110
+lua create_player("J Ford", find.nation_type("Australian"));
+aitoggle J Ford
+# Player 111
+lua create_player("JMD87", find.nation_type("Cornish"));
+aitoggle JMD87
+# Player 112
+lua create_player("Toussaint Charbonneau", find.nation_type("Metis"));
+aitoggle Toussaint Charbonneau
+# Player 113
+lua create_player("Arturo Alessandri", find.nation_type("Chilean"));
+aitoggle Arturo Alessandri
+# Player 114
+lua create_player("Ramses II", find.nation_type("Egyptian"));
+aitoggle Ramses II
+# Player 115
+lua create_player("Gen. Electro", find.nation_type("Karelian"));
+aitoggle Gen. Electro
+# Player 116
+lua create_player("Kocelj", find.nation_type("Slovenian"));
+aitoggle Kocelj
+# Player 117
+lua create_player("Joutsenkivi", find.nation_type("Bavarian"));
+aitoggle Joutsenkivi
+# Player 118
+lua create_player("Sugandha", find.nation_type("Kashmiri"));
+aitoggle Sugandha
+# Player 119
+lua create_player("Philippe le Hardi", find.nation_type("Burgundian"));
+aitoggle Philippe le Hardi
+# Player 120
+lua create_player("JWahn", find.nation_type("Atlantean"));
+aitoggle JWahn
+# Player 121
+lua create_player("Pah82", find.nation_type("Danish"));
+aitoggle Pah82
+# Player 122
+lua create_player("Tuumanen", find.nation_type("Vandalic"));
+aitoggle Tuumanen
+# Player 123
+lua create_player("TomTom", find.nation_type("Corsican"));
+aitoggle TomTom
+# Player 124
+lua create_player("Ulbricht", find.nation_type("East German"));
+aitoggle Ulbricht
+# Player 125
+lua create_player("Josip Broz Tito", find.nation_type("Yugoslav"));
+aitoggle Josip Broz Tito
+# Player 126
+lua create_player("Chaime lo Conqueridor", find.nation_type("Aragonese"));
+aitoggle Chaime lo Conqueridor
