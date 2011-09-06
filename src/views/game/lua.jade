@@ -3,5 +3,5 @@ p Pelin aloittamiseen tarvittava LUA-skripti:
 pre
 	- each player, i in work.players
 		- if player.number <= 126
-			| lua create_player("!{player.name}", find.nation_type("!{player.nation}"));
-			| aitoggle !{player.name}
+			| lua create_player("!{player.username}", find.nation_type("!{player.nation}"));
+			| aitoggle !{player.username}

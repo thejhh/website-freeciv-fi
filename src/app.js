@@ -589,7 +589,7 @@ function updateGamePlayerList() {
 		try {
 			req.work.players = [];
 			if(!req.work.game_id) throw Error("missing: req.work.game_id");
-			tables.reg.select('r.number', 'p.*').as('r').leftjoin('player AS p ON r.reg_id=p.reg_id').where({'r.game_id':req.work.game_id}).do(function(err, rows) {
+			tables.reg.select('r.number', 'p.*', 'a.name AS username').as('r').leftjoin('player AS p ON r.reg_id=p.reg_id', 'auth AS a ON (r.user_id=a.user_id AND r.game_id=a.game_id)').where({'r.game_id':req.work.game_id}).do(function(err, rows) {
 				try {
 					if(err) req.flash('error', "Tietokantayhteydessä tapahtui virhe: Sivulla voi olla vääriä tietoja.");
 					if(rows) req.work.players = rows;
