@@ -90,12 +90,13 @@ div(class='reg')
 				hr
 				br
 			- if(work.userRegisteredToGame)
-				a(href='setup', class='button positive')
-					img(src='/images/blueprint/plugins/buttons/icons/tick.png', alt='')
-					| Muokkaa
-				a(href='unreg', class='button negative')
-					img(src='/images/blueprint/plugins/buttons/icons/cross.png', alt='')
-					| Poista varaus
+				| Muutoksia pelipaikkaan ei voi tehdä pelin alkamisen jälkeen.
+				//- a(href='setup', class='button positive')
+				//- 	img(src='/images/blueprint/plugins/buttons/icons/tick.png', alt='')
+				//- 	| Muokkaa
+				//- a(href='unreg', class='button negative')
+				//- 	img(src='/images/blueprint/plugins/buttons/icons/cross.png', alt='')
+				//- 	| Poista varaus
 			- else
 				button(type='submit', class='button positive')
 					img(src='/images/blueprint/plugins/buttons/icons/tick.png', alt='')
