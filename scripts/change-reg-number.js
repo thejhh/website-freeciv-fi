@@ -1,9 +1,10 @@
+#!/usr/bin/env node
 
 var fs = require('fs'),
     sys = require('sys'),
 	foreach = require('snippets').foreach,
 	config = require('../src/config.js'),
-    sql = require('sqlmw')('mysql', config.sql);
+    sql = require('sqlmw')('mysql', config.sql, {'debug':true});
 
 /* Build group of queries to remove player from game
  * Required game_id: Game ID
@@ -20,9 +21,25 @@ var replace_player = sql.group(
 	sql.query('UPDATE auth SET user_id=:spare_user_id WHERE user_id=:target_user_id AND game_id=:game_id')
 );
 
-replace_player({'game_id':1, 'target_player_number':3, 'spare_player_number':4}, function(err) {
-	if(err) console.log('Failed to move player: ' + err);
-	else console.log('Successfully moved players');
-});
+var argv = require('optimist')
+    .usage('Usage: $0 --game=N --target=N --spare=N')
+    .demand(['game','target','spare'])
+    .argv;
+
+var game_id = argv.game;
+var target_player_number = argv.target;
+var spare_player_number = argv.spare;
+
+if(game_id && target_player_number && spare_player_number) {
+	replace_player({'game_id':game_id, 'target_player_number':target_player_number, 'spare_player_number':spare_player_number}, function(err) {
+		if(err) {
+			console.log('Failed to move player: ' + err);
+			process.exit(1);
+		} else {
+			console.log('Successfully moved players');
+			process.exit(0);
+		}
+	});
+}
 
 /* EOF */
