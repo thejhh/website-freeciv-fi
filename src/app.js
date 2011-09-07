@@ -624,20 +624,32 @@ function prepCurrentUserID(key) {
 			if(!req.work[key]) throw new TypeError("prepCurrentUserID: req.work."+key+" was not prepared!");
 			
 			// Check if user has registered already but just not logged in, and tell him that.
-			
-			// 2) Try to add a new user if not logged in
-			tables.user.insert({'user_id':req.work.user_id,'email':req.work.email}, function(err, user_id) {
-				try {
-					if(err) throw WebError('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.', err);
-					req.work.user_id = user_id;
-					req.flash('info', 'Käyttäjätunnus lisätty.');
-				} catch(e) {
-					next(e);
+			tables.user.select('COUNT(*) AS count').where({'email':req.work.email}).do(function(err, rows) {
+				
+				var count = rows && rows[0] && rows[0].count;
+				
+				if(count > 0) {
+					next(new WebError('Tämä sähköpostiosoite löytyy jo järjestelmästä. Voit rekisteröityä peliin sisäänkirjautumisen jälkeen.'));
 					return;
 				}
-				next();
+				
+				// 2) Try to add a new user if not logged in
+				console.log('Creating user with email ' + req.work.email);
+				tables.user.insert({'email':req.work.email}, function(err, user_id) {
+					try {
+						if(err) throw WebError('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.', err);
+						console.log('Created user #' + user_id);
+						req.work.user_id = user_id;
+						req.flash('info', 'Käyttäjätunnus lisätty.');
+					} catch(e) {
+						next(e);
+						return;
+					}
+					next();
+				});
+				
 			});
-		
+			
 		} catch(e) {
 			if(e) next(e);
 			else next();
