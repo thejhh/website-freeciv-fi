@@ -570,8 +570,7 @@ function updateGameCount() {
 				sql.query(
 					'SELECT COUNT(*) AS count'+
 					' FROM reg AS r'+
-					' LEFT JOIN user AS u ON r.user_id=u.user_id'+
-					" WHERE r.game_id = :game_id AND u.password != ''")
+					" WHERE r.game_id = :game_id")
 			);
 			game_count({'game_id':req.work.game_id}, function(err, result) {
 				try {
