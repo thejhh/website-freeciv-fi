@@ -565,9 +565,18 @@ function updateGameCount() {
 	return (function(req, res, next) {
 		try {
 			if(!req.work.game_id) throw Error("missing: req.work.game_id");
-			tables.reg.select('COUNT(*) AS count').where({'game_id':req.work.game_id}).do(function(err, rows) {
+			var game_count = sql.group(
+				sql.connect(),
+				sql.query(
+					'SELECT COUNT(*) AS count'+
+					' FROM reg AS r'+
+					' LEFT JOIN user AS u ON r.user_id=u.user_id'+
+					" WHERE r.game_id = :game_id AND u.password != ''")
+			);
+			game_count({'game_id':req.work.game_id}, function(err, result) {
 				try {
 					if(err) req.flash('error', "Tietokantayhteydessä tapahtui virhe: Sivulla voi olla vääriä tietoja.");
+					var rows = result && result._rows;
 					req.work.players = (rows && rows[0] && rows[0].count) || 0;
 					req.work.free_players = (req.work.players >= 126) ? 0 : (126 - req.work.players);
 					req.work.spare_players = (req.work.players >= 126) ? req.work.players - 126 : 0;
