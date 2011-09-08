@@ -1,0 +1,24 @@
+rfcstyle 
+normal 
+set size 60
+#set mapsize PLAYER
+#set tilesperplayer 90
+set landmass 23
+set topology WRAPX|WRAPY|ISO
+set generator FRACTAL
+set citymindist 3
+set startpos ALL
+#set startpos VARIABLE
+set tinyisles enabled
+set startunits ccwwx
+set saveturns 1
+#set separatepoles disabled
+set techpenalty 0
+set dispersion 3
+set timeout 86400
+set barbarians DISABLED
+set revolen 0
+set huts 126
+set aifill 0
+set fixedlength enabled
+set scorelog enabled
