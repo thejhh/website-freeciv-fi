@@ -10,6 +10,7 @@ var express = require('express'),
 	site_url = config.url || 'http://game.freeciv.fi',
     sys = require('sys'),
     util = require('util'),
+    sql = require('sqlmw')('mysql', config.sql, {'debug':true}),
     namespace = require('express-namespace'),
     foreach = require('snippets').foreach,
     trim = require('snippets').trim,
@@ -589,12 +590,20 @@ function updateGamePlayerList() {
 		try {
 			req.work.players = [];
 			if(!req.work.game_id) throw Error("missing: req.work.game_id");
-			tables.reg.select('r.number', 'p.*', 'a.name AS username').as('r').leftjoin(
-					'player AS p ON r.reg_id=p.reg_id', 
-					'auth AS a ON (r.user_id=a.user_id AND r.game_id=a.game_id)').where({'r.game_id':req.work.game_id}).do(function(err, rows) {
+			var list_game_players = sql.group(
+				sql.connect(),
+				sql.query(
+					'SELECT r.number, p.*, a.name AS username '+
+					'FROM reg AS r '+
+					'LEFT JOIN player AS p ON r.reg_id=p.reg_id '+
+					'LEFT JOIN auth AS a ON (r.user_id=a.user_id AND r.game_id=a.game_id) '+
+					'WHERE r.game_id = :game_id '+
+					'ORDER BY r.number')
+			);
+			list_game_players({'game_id':req.work.game_id}, function(err, state) {
 				try {
 					if(err) req.flash('error', "Tietokantayhteydessä tapahtui virhe: Sivulla voi olla vääriä tietoja.");
-					if(rows) req.work.players = rows;
+					if(state && state._rows) req.work.players = state._rows;
 				} catch(e) {
 					util.log('updateGamePlayerList: Exception: ' + e + ' [ignored]');
 				}

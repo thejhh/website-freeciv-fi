@@ -13,6 +13,7 @@
     , "pg": "*"
     , "mysql": "*"
     , "cradle": "*"
+    , "sqlmw": "*"
     , "nodemailer": "*"
   }
 }
