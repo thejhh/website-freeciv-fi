@@ -28,21 +28,24 @@ var sys = require('sys'),
     civserver = module.exports = {};
 
 /* Start Server */
-civserver.open = function(file) {
+civserver.start = function(config) {
+	config = config || {};
 	var command = 'freeciv-server',
-	    args = [
-			'-l', 'log/civ.log',
-			'-R', 'log/rank.log',
-			'-s', 'saves',
-			'-P', 
-			'-r', 'game',
-		//	'-a', 'fc_auth.conf',
-		//	'-f', file
-		],
-	    servercli = require('child_process').spawn(command, args),
+	    args = [],
+	    servercli,
 	    server = new EventEmitter(),
 	    buffer = "";
 	
+	if(config.logfile) args.push('-l', config.logfile);
+	if(config.rankfile) args.push('-R', config.rankfile);
+	if(config.savesdir) args.push('-s', config.savesdir);
+	if(config.ppm) args.push('-P');
+	if(config.rc) args.push('-r', 'game');
+	if(config.authfile) args.push('-a', config.authfile);
+	if(config.file) args.push('-f', config.file);
+	
+	servercli = require('child_process').spawn(command, args),
+
 	servercli.stdout.on('data', function(data) {
 		buffer += data;
 		var lines = buffer.split('\n');

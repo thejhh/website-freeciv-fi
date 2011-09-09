@@ -1,0 +1,20 @@
+{
+  "author": "",
+  "name": "freeciv-server",
+  "description": "Freeciv Server Runner",
+  "version": "0.0.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jheusala/website-freeciv-fi.git"
+  },
+  "engines": {
+    "node": "*"
+  },
+  "dependencies": {
+    "init": "*",
+    "socket.io": "*",
+    "socket.io-client": "*"
+  },
+  "devDependencies": {}
+}
