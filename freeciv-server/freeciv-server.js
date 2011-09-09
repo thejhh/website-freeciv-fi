@@ -36,6 +36,16 @@ server.on('reply', function(msg) {
 	console.log('reply: ' + msg);
 });
 
+server.on('command executed', function(cmd) {
+	console.log('command executed: ' + cmd);
+});
+
+/* Shutdown when Control-C */
+process.on('SIGINT', function () {
+	console.log('Got SIGINT. Shutting down.');
+	server.end();
+});
+
 /* Save server logs every 60 seconds */
 setInterval(function() {
 	function f(n) { return (""+n).length === 1 ? "0"+n : n; }

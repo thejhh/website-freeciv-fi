@@ -31,10 +31,10 @@ var sys = require('sys'),
 civserver.open = function(file) {
 	var command = 'freeciv-server',
 	    args = [
-		//	'-l', 'log/civ.log',
-		//	'-R', 'log/rank.log',
-		//	'-s', 'saves',
-		//	'-P', 
+			'-l', 'log/civ.log',
+			'-R', 'log/rank.log',
+			'-s', 'saves',
+			'-P', 
 			'-r', 'game',
 		//	'-a', 'fc_auth.conf',
 		//	'-f', file
@@ -69,6 +69,12 @@ civserver.open = function(file) {
 	server.exec = function(cmd) {
 		servercli.stdin.write(cmd+"\n");
 		server.emit('command executed', cmd);
+	};
+	
+	/* Execute command */
+	server.end = function(cmd) {
+		server.exec('quit');
+		servercli.stdin.end();
 	};
 	
 	return server;
