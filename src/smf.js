@@ -4,6 +4,7 @@ var fs = require('fs'),
     sys = require('sys'),
 	foreach = require('snippets').foreach,
     sql = require('./sqlmw.js'),
+    trim = require('snippets').trim,
 	hash = require('./hash.js'),
     smf = module.exports = {};
 
@@ -16,11 +17,19 @@ smf.registerMember = function registerMember(args, next) {
 	if(!args.email) throw new TypeError('email required');
 	if(!args.password) throw new TypeError('password required');
 	
+	args.username = trim(''+args.username);
+	args.email = trim(''+args.email);
+	args.password = trim(''+args.password);
+	
+	if(args.username.length.length < 3) throw new TypeError('username too short!');
+	if(args.email.length < 5) throw new TypeError('email too short!');
+	if(args.password.length < 8) throw new TypeError('password too short!');
+	
 	var values = {
 			'member_name': args.username,
 			'email_address': args.email,
-			'passwd': hash.sha1( args.username.strToLowerCase() + args.password ),
-			'password_salt': hash.md5(args.username.strToLowerCase() + args.password).substr(0, 4), // AFAIK this isn't even used inside SMF?
+			'passwd': hash.sha1( args.username.toLowerCase() + args.password ),
+			'password_salt': hash.md5(args.username.toLowerCase() + args.password).substr(0, 4), // AFAIK this isn't even used inside SMF?
 			'posts': 0,
 			'date_registered': new Date(),
 			'member_ip': args.member_ip || '127.0.0.1',
