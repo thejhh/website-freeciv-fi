@@ -73,7 +73,7 @@ smf.registerMember = function registerMember(args, next) {
 	var insert = sql.group(
 		sql.group( // Note: Sub-group will create a second scope for values so we don't mess original options for INSERT INTO
 			sql.connect(),
-			sql.query('SELECT id_member FROM '+smf.dbprefix+'members WHERE email_address = :email OR email_address = :username LIMIT 1'),
+			sql.query('SELECT id_member FROM '+smf.dbprefix+'members WHERE email_address = :email_address OR email_address = :member_name LIMIT 1'),
 			function(state, next) {
 				if(state.id_member) {
 					next('Member exists already!');
