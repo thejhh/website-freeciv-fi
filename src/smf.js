@@ -62,7 +62,7 @@ smf.registerMember = function registerMember(args, next) {
 	});
 	
 	var insert = sql.group(
-		sql.group( // Note: Sub-group will create a second scope for values so we don't mess original state
+		sql.group( // Note: Sub-group will create a second scope for values so we don't mess original options for INSERT INTO
 			sql.connect(),
 			sql.query('SELECT id_member FROM '+smf.dbprefix+'members WHERE email_address = :email OR email_address = :username LIMIT 1'),
 			function(state, next) {
@@ -71,8 +71,8 @@ smf.registerMember = function registerMember(args, next) {
 				} else {
 					next();
 				}
-			},
-		},
+			}
+		),
 		sql.query('INSERT INTO '+smf.dbprefix+'members (' + keys.join(', ') + ') VALUES (' + placeholders.join(', ') + ')')
 	);
 	
