@@ -15,7 +15,11 @@ CREATE TABLE `game` (
 CREATE TABLE `user` (
 	user_id     BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	email       VARCHAR(255) UNIQUE NOT NULL DEFAULT '',
+	name        VARCHAR(255) UNIQUE,
+	realname    VARCHAR(255) NOT NULL DEFAULT '',
 	password    VARCHAR(255) NOT NULL DEFAULT '',
+	smf_password VARCHAR(255) NOT NULL DEFAULT '',
+	wiki_password VARCHAR(255) NOT NULL DEFAULT '',
 	PRIMARY KEY(user_id)) CHARACTER SET utf8;
 
 /* Registrations */
