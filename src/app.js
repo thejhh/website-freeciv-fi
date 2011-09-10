@@ -232,8 +232,7 @@ app.param('gameId', function(req, res, next, id){
 // Middlewares
 
 /* Validate and prepare login */
-function prepLoginAuth(back) {
-	var back = back || 'back';
+function prepLoginAuth() {
 	util.log('prepLoginAuth: start');
 	return (function(req, res, next) {
 		try {
@@ -936,7 +935,7 @@ app.get('/ilmo', redirect(site_url+'/game/2011-I'));
 app.namespace('/login', function(){
 
 	/* Handle requests for authKey */
-	app.post('/reset', prepBodyEmail(), prepSQLRowBy('user', 'email'), createAuthKey(), sendEmailAuthKey(), redirect('back'));
+	app.post('/reset', prepBodyEmail(), prepSQLRowBy('user', 'email'), createAuthKey(), sendEmailAuthKey(), redirect(site_url+'/'));
 	
 	/* Display login reset page */
 	app.get('/reset', function(req, res){
@@ -944,7 +943,7 @@ app.namespace('/login', function(){
 	});
 	
 	/* Handle login process */
-	app.post('/', prepLoginAuth(), checkAuth(), redirect('back'));
+	app.post('/', prepLoginAuth(), checkAuth(), redirect(site_url+'/'));
 
 	/* Display login page */
 	app.get('/', function(req, res){
@@ -953,7 +952,7 @@ app.namespace('/login', function(){
 }); // end of /login
 
 /* Logout */
-app.get('/logout', logout(), redirect('back'));
+app.get('/logout', logout(), redirect(site_url+'/'));
 
 /* Email Validations */
 app.namespace('/act/:authKey', function(){
@@ -994,7 +993,7 @@ app.namespace('/profile', function(){
 	});
 	
 	/* User profile page */
-	app.post('/edit', checkAuth(), prepBodyPasswords(), prepRename('user_id', 'session.user.user_id'), updateSQLRow('user', ['password']), redirect('back'));
+	app.post('/edit', checkAuth(), prepBodyPasswords(), prepRename('user_id', 'session.user.user_id'), updateSQLRow('user', ['password']), redirect(site_url+'/profile'));
 
 	/* User profile page */
 	app.get('/edit', checkAuth(), function(req, res){
@@ -1034,7 +1033,7 @@ app.namespace('/game', function(){
 		});
 		
 		/* Handle registration request */
-		app.post('/reg', prepBodyEmail(), prepCurrentUserID(), addReg(), updateUserRegisteredToGame(), createAuthKey(), sendEmailAuthKey(true), redirect('back'));
+		app.post('/reg', prepBodyEmail(), prepCurrentUserID(), addReg(), updateUserRegisteredToGame(), createAuthKey(), sendEmailAuthKey(true), redirect(site_url+'/'));
 		
 		/* Handle unregistration request */
 		app.get('/unreg', checkAuth(), updateUserRegisteredToGame(), prepPlayerData(), prepPlayerAuthData(), function(req, res){
@@ -1042,7 +1041,7 @@ app.namespace('/game', function(){
 		});
 		
 		/* Handle unregistration request */
-		app.post('/unreg', prepBodyEmail(), checkAuth(), prepCurrentUserID(), delPlayer(), delReg(), redirect('back'));
+		app.post('/unreg', prepBodyEmail(), checkAuth(), prepCurrentUserID(), delPlayer(), delReg(), redirect(site_url+'/'));
 		
 		/* Handle unregistration request */
 		app.get('/setup', checkAuth(), updateUserRegisteredToGame(), prepPlayerData(), prepPlayerAuthData(), prepFreecivData(), function(req, res){
