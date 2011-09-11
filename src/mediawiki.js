@@ -8,7 +8,7 @@ var fs = require('fs'),
 	hash = require('./hash.js'),
     mediawiki = module.exports = {};
 
-mediawiki.dbprefix = 'smf2_';
+mediawiki.dbprefix = 'wiki_';
 
 /* Create hashed password (in Mediawiki's B-style) */
 mediawiki.createPassword = function(password, salt) {
@@ -16,13 +16,92 @@ mediawiki.createPassword = function(password, salt) {
 	return ':B:' + salt + ':' + hash.md5( salt + '-' + hash.md5( args.password ) );
 };
 
-/* Register new user */
-mediawiki.registerUser = function(args, next) {
-	/*
+/* Default options for new users */
+mediawiki.defaultOptions = {
+	'quickbar': 1,
+	'underline': 2,
+	'cols': 80,
+	'rows': 25,
+	'searchlimit': 20,
+	'contextlines': 5,
+	'contextchars': 50,
+	'disablesuggest': 0,
+	'skin': '',
+	'math': 1,
+	'usenewrc': 0,
+	'rcdays': 7,
+	'rclimit': 50,
+	'wllimit': 250,
+	'hideminor': 0,
+	'hidepatrolled': 0,
+	'newpageshidepatrolled': 0,
+	'highlightbroken': 1,
+	'stubthreshold': 0,
+	'previewontop': 1,
+	'previewonfirst': 0,
+	'editsection': 1,
+	'editsectiononrightclick': 0,
+	'editondblclick': 0,
+	'editwidth': 0,
+	'showtoc': 1,
+	'showtoolbar': 1,
+	'minordefault': 0,
+	'date': 'default',
+	'imagesize': 2,
+	'thumbsize': 2,
+	'rememberpassword': 0,
+	'nocache': 0,
+	'diffonly': 0,
+	'showhiddencats': 0,
+	'norollbackdiff': 0,
+	'enotifwatchlistpages': 0,
+	'enotifusertalkpages': 1,
+	'enotifminoredits': 0,
+	'enotifrevealaddr': 0,
+	'shownumberswatching': 1,
+	'fancysig': 0,
+	'externaleditor': 0,
+	'externaldiff': 0,
+	'forceeditsummary': 0,
+	'showjumplinks': 1,
+	'justify': 0,
+	'numberheadings': 0,
+	'uselivepreview': 0,
+	'watchlistdays': 3,
+	'extendwatchlist': 0,
+	'watchlisthideminor': 0,
+	'watchlisthidebots': 0,
+	'watchlisthideown': 0,
+	'watchlisthideanons': 0,
+	'watchlisthideliu': 0,
+	'watchlisthidepatrolled': 0,
+	'watchcreations': 0,
+	'watchdefault': 0,
+	'watchmoves': 0,
+	'watchdeletion': 0,
+	'noconvertlink': 0,
+	'gender': 'unknown',
+	'variant': 'fi',
+	'language': 'fi',
+	'searchNs0': 1
+};
+
+/* Encode MediaWiki options */
+mediawiki.encodeOptions = function(options) {
+	var values = [];
+	foreach(options).each(function(v, k) {
+		values.push(k+'='+v);
+	});
+	return values.join('\n');
+};
+
+/* Create new user */
+mediawiki.createUser = function(args, next) {
 	if(!args.username) throw new TypeError('username required');
 	if(!args.email) throw new TypeError('email required');
 	if(!args.password) throw new TypeError('password required');
 	
+	args.realname = trim(''+ (args.realname||'') );
 	args.username = trim(''+args.username);
 	args.email = trim(''+args.email);
 	args.password = trim(''+args.password);
@@ -31,42 +110,19 @@ mediawiki.registerUser = function(args, next) {
 	if(args.email.length < 5) throw new TypeError('email too short!');
 	if(args.password.length < 8) throw new TypeError('password too short!');
 	
+	var wiki_user_name = args.username[0].toUpperCase() + args.username.substr(1);
+	
 	var values = {
-		'member_name': args.username,
-		'email_address': args.email,
-		'passwd': hash.sha1( args.username.toLowerCase() + args.password ),
-		'password_salt': hash.md5(args.username.toLowerCase() + args.password).substr(0, 4), // AFAIK this isn't even used inside SMF?
-		'posts': 0,
-		'date_registered': new Date(),
-		'member_ip': args.member_ip || '127.0.0.1',
-		'member_ip2': args.member_ip2 || '127.0.0.1',
-		'validation_code': '',
-		'real_name': args.username,
-		'personal_text': '',
-		'pm_email_notify': 1,
-		'id_theme': 0,
-		'id_post_group': 4,
-		'lngfile': '',
-		'buddy_list': '',
-		'pm_ignore_list': '',
-		'message_labels': '',
-		'website_title': '',
-		'website_url': '',
-		'location': '',
-		'icq': '',
-		'aim': '',
-		'yim': '',
-		'msn': '',
-		'time_format': '',
-		'signature': '',
-		'avatar': '',
-		'usertitle': '',
-		'secret_question': '',
-		'secret_answer': '',
-		'additional_groups': '',
-		'ignore_boards': '',
-		'smiley_set': '',
-		'openid_uri': ''
+		'user_name': wiki_user_name,
+		'user_password': mediawiki.createPassword(args.password),
+		'user_newpassword': '',
+		'user_email': args.email,
+		'user_email_authenticated': new Date(),
+		'user_real_name': args.realname,
+		'user_options': mediawiki.encodeOptions(mediawiki.defaultOptions),
+		//'user_token': mediawiki.getToken(),
+		'user_registration': new Date(),
+		'user_editcount': 0
 	};
 	
 	var keys = [],
@@ -79,20 +135,19 @@ mediawiki.registerUser = function(args, next) {
 	var insert = sql.group(
 		sql.group( // Note: Sub-group will create a second scope for values so we don't mess original options for INSERT INTO
 			sql.connect(),
-			sql.query('SELECT id_member FROM '+smf.dbprefix+'members WHERE email_address = :email_address OR email_address = :member_name LIMIT 1'),
+			sql.query('SELECT user_id FROM '+mediawiki.dbprefix+'user WHERE user_name = :user_name OR user_email = :user_email LIMIT 1'),
 			function(state, next) {
-				if(state.id_member) {
-					next('Member exists already!');
+				if(state.user_id) {
+					next('User exists already!');
 				} else {
 					next();
 				}
 			}
 		),
-		sql.query('INSERT INTO '+mediawiki.dbprefix+'members (' + keys.join(', ') + ') VALUES (' + placeholders.join(', ') + ')')
+		sql.query('INSERT INTO '+mediawiki.dbprefix+'user (' + keys.join(', ') + ') VALUES (' + placeholders.join(', ') + ')')
 	);
 	
 	insert(values, next);
-	*/
 };
 
 /* Change user password */
