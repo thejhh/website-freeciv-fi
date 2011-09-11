@@ -13,6 +13,11 @@ var fs = require('fs'),
 
 smf.dbprefix = 'smf2_';
 
+/* Create hashed password for SMF */
+smf.createPassword = function(password, username) {
+	return hash.sha1( username.toLowerCase() + password );
+};
+
 /* Register new member */
 smf.registerMember = function(args, next) {
 	
@@ -37,7 +42,7 @@ smf.registerMember = function(args, next) {
 	}
 	
 	if(args.crypted_password === undefined) {
-		args.crypted_password = hash.sha1( args.username.toLowerCase() + args.password );
+		args.crypted_password = smf.createPassword(args.password, args.username);
 	}
 	
 	if(args.username.length.length < 3) {
@@ -135,7 +140,7 @@ smf.changePassword = function(args, next) {
 	}
 	
 	if(args.crypted_password === undefined) {
-		args.crypted_password = hash.sha1( args.username.toLowerCase() + args.password );
+		args.crypted_password = smf.createPassword(args.password, args.username);
 	}
 	
 	var values = {
