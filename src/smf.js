@@ -15,20 +15,27 @@ smf.registerMember = function(args, next) {
 	
 	if(!args.username) throw new TypeError('username required');
 	if(!args.email) throw new TypeError('email required');
-	if(!args.password) throw new TypeError('password required');
+	if(!( args.password || args.crypted_password )) throw new TypeError('password required');
 	
 	args.username = trim(''+args.username);
 	args.email = trim(''+args.email);
-	args.password = trim(''+args.password);
+	
+	if(args.password !== undefined) {
+		args.password = trim(''+args.password);
+		if(args.password.length < 8) throw new TypeError('password too short!');
+	}
+	
+	if(args.crypted_password === undefined) {
+		args.crypted_password = hash.sha1( args.username.toLowerCase() + args.password );
+	}
 	
 	if(args.username.length.length < 3) throw new TypeError('username too short!');
 	if(args.email.length < 5) throw new TypeError('email too short!');
-	if(args.password.length < 8) throw new TypeError('password too short!');
 	
 	var values = {
 		'member_name': args.username,
 		'email_address': args.email,
-		'passwd': hash.sha1( args.username.toLowerCase() + args.password ),
+		'passwd': args.crypted_password,
 		'password_salt': hash.createToken(4), // AFAIK this isn't even used inside SMF?
 		'posts': 0,
 		'date_registered': new Date(),
@@ -92,17 +99,24 @@ smf.registerMember = function(args, next) {
 smf.changePassword = function(args, next) {
 	
 	if(!args.username) throw new TypeError('username required');
-	if(!args.password) throw new TypeError('password required');
+	if(!( args.password || args.crypted_password )) throw new TypeError('password required');
 	
 	args.username = trim(''+args.username);
-	args.password = trim(''+args.password);
+	
+	if(args.password !== undefined) {
+		args.password = trim(''+args.password);
+		if(args.password.length < 8) throw new TypeError('password too short!');
+	}
 	
 	if(args.username.length.length < 3) throw new TypeError('username too short!');
-	if(args.password.length < 8) throw new TypeError('password too short!');
+	
+	if(args.crypted_password === undefined) {
+		args.crypted_password = hash.sha1( args.username.toLowerCase() + args.password );
+	}
 	
 	var values = {
 		'member_name': args.username,
-		'passwd': hash.sha1( args.username.toLowerCase() + args.password ),
+		'passwd': args.crypted_password,
 		'password_salt': hash.createToken(4) // AFAIK this isn't even used inside SMF?
 	};
 	
@@ -126,5 +140,8 @@ smf.changePassword = function(args, next) {
 	
 	update(values, next);
 };
+
+/* Select user by email */
+smf.getMemberByEmail = sql.group(sql.connect(), sql.query('SELECT * FROM '+smf.dbprefix+'members WHERE email_address = :email_address LIMIT 1'));
 
 /* EOF */

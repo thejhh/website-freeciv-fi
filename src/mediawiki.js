@@ -99,22 +99,25 @@ mediawiki.encodeOptions = function(options) {
 mediawiki.createUser = function(args, next) {
 	if(!args.username) throw new TypeError('username required');
 	if(!args.email) throw new TypeError('email required');
-	if(!args.password) throw new TypeError('password required');
+	if(! (args.password || args.crypted_password) ) throw new TypeError('password required');
 	
 	args.username = trim(''+args.username);
 	args.email = trim(''+args.email);
-	args.password = trim(''+args.password);
 	args.realname = trim(''+ (args.realname||args.username) );
-	
+	if(args.password !== undefined) {
+		args.password = trim(''+args.password);
+		if(args.password.length < 8) throw new TypeError('password too short!');
+	}
 	if(args.username.length.length < 3) throw new TypeError('username too short!');
 	if(args.email.length < 5) throw new TypeError('email too short!');
-	if(args.password.length < 8) throw new TypeError('password too short!');
+	
+	if(args.crypted_password === undefined) args.crypted_password = mediawiki.createPassword(args.password);
 	
 	var wiki_user_name = args.username[0].toUpperCase() + args.username.substr(1);
 	
 	var values = {
 		'user_name': wiki_user_name,
-		'user_password': mediawiki.createPassword(args.password),
+		'user_password': args.crypted_password,
 		'user_newpassword': '',
 		'user_email': args.email,
 		'user_email_authenticated': new Date(),
@@ -153,19 +156,25 @@ mediawiki.createUser = function(args, next) {
 /* Change user password */
 mediawiki.changePassword = function(args, next) {
 	if(!args.username) throw new TypeError('username required');
-	if(!args.password) throw new TypeError('password required');
+	if(! (args.password || args.crypted_password) ) throw new TypeError('password required');
 	
 	args.username = trim(''+args.username);
-	args.password = trim(''+args.password);
-	
 	if(args.username.length.length < 3) throw new TypeError('username too short!');
-	if(args.password.length < 8) throw new TypeError('password too short!');
+	
+	if(args.password !== undefined) {
+		args.password = trim(''+args.password);
+		if(args.password.length < 8) throw new TypeError('password too short!');
+	}
+	
+	if(args.crypted_password === undefined) {
+		args.crypted_password = mediawiki.createPassword(args.password);
+	}
 	
 	var wiki_user_name = args.username[0].toUpperCase() + args.username.substr(1);
 	
 	var values = {
 		'user_name': wiki_user_name,
-		'user_password': mediawiki.createPassword(args.password)
+		'user_password': args.crypted_password
 	};
 	
 	var update = sql.group(
@@ -183,5 +192,8 @@ mediawiki.changePassword = function(args, next) {
 	
 	update(values, next);
 };
+
+/* Select user by email */
+mediawiki.getUserByEmail = sql.group(sql.connect(), sql.query('SELECT * FROM '+mediawiki.dbprefix+'user WHERE user_email = :user_email LIMIT 1'));
 
 /* EOF */
