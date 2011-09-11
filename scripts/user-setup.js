@@ -1,6 +1,10 @@
 #!/usr/bin/env node
 
+/* for node-lint */
+/*global Buffer: false, clearInterval: false, clearTimeout: false, console: false, global: false, module: false, process: false, querystring: false, require: false, setInterval: false, setTimeout: false, util: false, __filename: false, __dirname: false */
+
 var smf = require('../src/smf.js'),
+    mediawiki = require('../src/mediawiki.js'),
     core = require('../src/core.js'),
     sys = require('sys'),
     sql = require('../src/sqlmw.js'),
@@ -135,8 +139,11 @@ if(argv.users) {
 			actions.push(function(state, next) {
 				console.log('Running user #' + row.user_id + '...');
 				setupUser(row, function(err) {
-					if(err) console.log('Error: ' + err);
-					else console.log('Done #' + row.user_id);
+					if(err) {
+						console.log('Error: ' + err);
+					} else {
+						console.log('Done #' + row.user_id);
+					}
 					next();
 				});
 			});

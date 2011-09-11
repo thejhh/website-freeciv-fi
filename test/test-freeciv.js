@@ -2,15 +2,12 @@
 /*global Buffer: false, clearInterval: false, clearTimeout: false, console: false, global: false, module: false, process: false, querystring: false, require: false, setInterval: false, setTimeout: false, util: false, __filename: false, __dirname: false */
 
 
-/**
- * Module dependencies.
- */
 
-var cradle = require('./cradle.js'),
-    databases = module.exports = {};
+var sys = require('sys'),
+    config = require('./config.js'),
+    freeciv = require('./freeciv.js');
 
-/* Databases */
-databases.activations = cradle.database('freeciv-activations');
-//databases.sessions = cradle.database('freeciv-sessions');
-
-/* EOF */
+freeciv.data("../freeciv.json", function(err, data) {
+	if(err) console.error('Error: ' + err);
+	else console.log( sys.inspect( data.groups ) );
+});

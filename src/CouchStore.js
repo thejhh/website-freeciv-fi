@@ -1,3 +1,6 @@
+/* for node-lint */
+/*global Buffer: false, clearInterval: false, clearTimeout: false, console: false, global: false, module: false, process: false, querystring: false, require: false, setInterval: false, setTimeout: false, util: false, __filename: false, __dirname: false */
+
 
 /* Note: Broken unused file */
 
@@ -29,7 +32,7 @@ module.exports = (function(connect) {
 				var undefined, data = {};
 				if( (!doc) || (err && (err.error === 'not_found') && (err.reason==='missing')) ) return callback();
 				if(err) return callback(sys.inspect(err));
-				foreach(doc).do(function(v, k) { data[k] = v; });
+				foreach(doc).each(function(v, k) { data[k] = v; });
 				callback(null, data);
 			});
 		} catch(e) {

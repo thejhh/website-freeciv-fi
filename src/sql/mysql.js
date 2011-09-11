@@ -1,3 +1,6 @@
+/* for node-lint */
+/*global Buffer: false, clearInterval: false, clearTimeout: false, console: false, global: false, module: false, process: false, querystring: false, require: false, setInterval: false, setTimeout: false, util: false, __filename: false, __dirname: false */
+
 
 /**
  * Module dependencies.
@@ -25,7 +28,7 @@ _lib.insert = (function(table, data, callback) {
 	try {
 		var client = _client, keys=[], values=[], query;
 		if(!client) return callback("!client");
-		foreach(data).do(function(v, k) {
+		foreach(data).each(function(v, k) {
 			if((k === 'password') && (v!='') ) {
 				keys.push("`"+k+"` = ENCRYPT(?, ?)");
 				values.push(v);
@@ -67,7 +70,7 @@ _lib.select = (function(table, options, callback) {
 			short_table = options.short_table || 't',
 		    query;
 		if(!client) return callback("!client");
-		foreach(options.where).do(function(v, k) {
+		foreach(options.where).each(function(v, k) {
 			keys.push(k);
 			values.push(v);
 		});
@@ -100,7 +103,7 @@ _lib.del = (function(table, options, callback) {
 			limit = options.limit,
 		    query;
 		if(!client) return callback("!client");
-		foreach(options.where).do(function(v, k) {
+		foreach(options.where).each(function(v, k) {
 			keys.push(k);
 			values.push(v);
 		});
@@ -136,7 +139,7 @@ _lib.update = (function(table, options, callback) {
 		util.log("Updating at sql/mysql.js...");
 		if(!client) return callback("!client");
 		util.log("Foreach what...");
-		foreach(what).do(function(v, k) {
+		foreach(what).each(function(v, k) {
 			if((k === 'password') && (v!='') ) {
 				what_keys.push("`"+k+"` = ENCRYPT(?, ?)");
 				values.push(v);
@@ -147,7 +150,7 @@ _lib.update = (function(table, options, callback) {
 			}
 		});
 		util.log("Foreach where...");
-		foreach(where).do(function(v, k) {
+		foreach(where).each(function(v, k) {
 			where_keys.push(k);
 			values.push(v);
 		});

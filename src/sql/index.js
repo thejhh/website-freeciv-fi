@@ -1,3 +1,6 @@
+/* for node-lint */
+/*global Buffer: false, clearInterval: false, clearTimeout: false, console: false, global: false, module: false, process: false, querystring: false, require: false, setInterval: false, setTimeout: false, util: false, __filename: false, __dirname: false */
+
 /* Common interface for relational database */
 
 var sys = require('sys'),
@@ -5,13 +8,13 @@ var sys = require('sys'),
     _lib = module.exports = require('./mysql.js');
 
 /* Build common interface for accessing data in specific table */
-_lib.table = (function(table) {
+_lib.table = function(table) {
 	var obj = {};
 	obj.insert = (function(values, callback) { return _lib.insert(table, values, callback); }); // Insert row
 	
 	obj.select = (function() {
 		var options = {'what': []};
-		foreach(arguments).do(function(v) { options.what.push(v); });
+		foreach(arguments).each(function(v) { options.what.push(v); });
 		if(options.what.length === 0) options.what.push('*');
 		options.leftjoin = [];
 		return ({
@@ -24,14 +27,14 @@ _lib.table = (function(table) {
 				return this;
 			},
 			'leftjoin':function() {
-				foreach(arguments).do(function(v) { options.leftjoin.push(v); });
+				foreach(arguments).each(function(v) { options.leftjoin.push(v); });
 				return this;
 			},
 			'where':function(where) {
 				options.where = where;
 				return this;
 			},
-			'do':function(callback) {
+			'exec':function(callback) {
 				console.log('Selecting from %s table with %s', table, sys.inspect(options));
 				return _lib.select(table, options, callback);
 			}
@@ -40,7 +43,7 @@ _lib.table = (function(table) {
 	
 	obj.del = (function() {
 		var options = {'what': []};
-		foreach(arguments).do(function(v) { options.what.push(v); });
+		foreach(arguments).each(function(v) { options.what.push(v); });
 		if(options.what.length === 0) options.what.push('*');
 		return ({
 			'limit':function(limit) {
@@ -51,7 +54,7 @@ _lib.table = (function(table) {
 				options.where = where;
 				return this;
 			},
-			'do':function(callback) {
+			'exec':function(callback) {
 				console.log('Deleting from %s table with %s', table, sys.inspect(options));
 				return _lib.del(table, options, callback);
 			}
@@ -75,7 +78,7 @@ _lib.table = (function(table) {
 				options.what[k] = v;
 				return this;
 			},
-			'do':function(callback) {
+			'exec':function(callback) {
 				console.log('Updating table %s with %s', table, sys.inspect(options));
 				return _lib.update(table, options, callback);
 			}
@@ -84,6 +87,6 @@ _lib.table = (function(table) {
 	obj.count = (function(callback) { return _lib.count(table, callback); }); // Count table rows
 	obj.authcheck = (function(options, callback) { return _lib.authcheck(table, options, callback); }); // Count table rows
 	return obj;
-});
+};
 
 /* EOF */

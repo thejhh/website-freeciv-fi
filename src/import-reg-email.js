@@ -1,4 +1,5 @@
-
+/* for node-lint */
+/*global Buffer: false, clearInterval: false, clearTimeout: false, console: false, global: false, module: false, process: false, require: false, setInterval: false, setTimeout: false, util: false, __filename: false, __dirname: false */
 
 var http = require('http'),
     querystring = require('querystring'),
@@ -10,28 +11,35 @@ function do_error(msg) {
 	process.exit(1);
 }
 
-var game_id = 1;
-var email = process.argv[2];
-if(!email) do_error("!email");
+var game_id = 1,
+    email = process.argv[2];
+if(!email) {
+	do_error("!email");
+}
 
 tables.user.insert({'email':email}, function(err, user_id) {
-	if(err) return do_error(err);
+	if(err) {
+		return do_error(err);
+	}
 	tables.reg.insert({'game_id':game_id, 'user_id':user_id}, function(err, reg_id) {
-		if(err) return do_error(err);
+		if(err) {
+			return do_error(err);
+		}
 		
 		var options = {
-			host: 'game.freeciv.fi',
-			port: 3001,
-  			path: '/login/reset',
-			method: 'POST',
-			headers: {'content-type':'application/x-www-form-urlencoded'}
-		};
-		
-		var req = http.request(options, function(res) {
-			if(res.statusCode !== 302) return do_error('status was ' + res.statusCode);
-			console.log("Done");
-			process.exit(0);
-		});
+				host: 'game.freeciv.fi',
+				port: 3001,
+				path: '/login/reset',
+				method: 'POST',
+				headers: {'content-type':'application/x-www-form-urlencoded'}
+			},
+		    req = http.request(options, function(res) {
+				if(res.statusCode !== 302) {
+					return do_error('status was ' + res.statusCode);
+				}
+				console.log("Done");
+				process.exit(0);
+			});
 		
 		req.on('error', function(e) {
 			console.log('problem with reset request: ' + e.message);
