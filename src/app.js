@@ -257,18 +257,21 @@ function setupCoreUser() {
 				next();
 				return;
 			}
-			core.setupUser( (function() {
-				var obj = {};
+			core.setupUser( 
+				(function() {
+					var obj = {};
 					foreach(req.session.user).each(function(v, k) {
 						obj[k] = v;
 					});
-					obj['raw_password'] = req.work.raw_password;
+					obj.raw_password = req.work.raw_password;
 					return obj;
-				})(), function(err) {
-				if(err) {
-					util.log('Error in setupCoreUser: ' + err);
-				}
-			});
+				}()),
+				function(err) {
+					if(err) {
+						util.log('Error in setupCoreUser: ' + sys.inspect(err) + " [ignored]");
+					}
+					next();
+				});
 		} catch(e) {
 			next(e||new TypeError('Error'));
 		}
@@ -315,7 +318,7 @@ function prepLoginAuth() {
 							req.flash('info', 'Sisäänkirjautuminen onnistui.');
 							req.work.raw_password = raw_password;
 						} catch(e) {
-							next(e|||new TypeError('Error'));
+							next(e||new TypeError('Error'));
 							return;
 						}
 						next();
@@ -404,6 +407,7 @@ function prepBodyPasswords(key1, key2) {
 				throw new WebError("Salasanat eivät vastaa toisiaan");
 			}
 			req.work[key1] = pw1;
+			req.work.raw_password = pw1;
 		} catch(e) {
 			next(e||new TypeError('Error'));
 			return;
@@ -659,10 +663,11 @@ function sendEmailAuthKey(soft) {
 				next();
 			});
 		} catch(e) {
-			if(e) {
-				util.log("Error: " + e);
+			if(e === "") {
+				next();
+				return;
 			}
-			next();
+			next(e||new TypeError('Error'));
 		}
 	};
 }
@@ -699,10 +704,11 @@ function updateUserRegisteredToGame() {
 				next();
 			});
 		} catch(e) {
-			if(e) {
-				util.log('updateUserRegisteredToGame: Exception: ' + e + ' [ignored]');
+			if(e === "") {
+				next();
+				return;
 			}
-			next();
+			next(e||new TypeError('Error'));
 		}
 	};
 }
@@ -830,10 +836,10 @@ function prepCurrentUserID(key) {
 			});
 			
 		} catch(e) {
-			if(e) {
-				next(e||new TypeError('Error'));
-			} else {
+			if(e === "") {
 				next();
+			} else {
+				next(e||new TypeError('Error'));
 			}
 		}
 	};
@@ -930,10 +936,10 @@ function delPlayer() {
 				next();
 			});
 		} catch(e) {
-			if(e) {
-				next(e||new TypeError('Error'));
-			} else {
+			if(e === "") {
 				next();
+			} else {
+				next(e||new TypeError('Error'));
 			}
 		}
 	};
@@ -1004,20 +1010,20 @@ function prepPlayerData() {
 					req.work.player_id = rows[0].player_id;
 					req.work.player = rows[0];
 				} catch(e) {
-					if(e) {
-						next(e||new TypeError('Error'));
-					} else {
+					if(e === "") {
 						next();
+					} else {
+						next(e||new TypeError('Error'));
 					}
 					return;
 				}
 				next();
 			});
 		} catch(e) {
-			if(e) {
-				next(e||new TypeError('Error'));
-			} else {
+			if(e === "") {
 				next();
+			} else {
+				next(e||new TypeError('Error'));
 			}
 		}
 	};
@@ -1042,20 +1048,20 @@ function prepPlayerAuthData() {
 					req.work.auth_id = rows[0].auth_id;
 					req.work.auth = rows[0];
 				} catch(e) {
-					if(e) {
-						next(e||new TypeError('Error'));
-					} else {
+					if(e === "") {
 						next();
+					} else {
+						next(e||new TypeError('Error'));
 					}
 					return;
 				}
 				next();
 			});
 		} catch(e) {
-			if(e) {
-				next(e||new TypeError('Error'));
-			} else {
+			if(e === "") {
 				next();
+			} else {
+				next(e||new TypeError('Error'));
 			}
 		}
 	};
@@ -1243,6 +1249,7 @@ app.namespace('/profile', function(){
 			}
 			next();
 		},
+		setupCoreUser(),
 		redirect(site_url+'/profile'));
 	
 	/* User profile page */
