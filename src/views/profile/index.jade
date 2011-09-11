@@ -4,6 +4,12 @@ fieldset
 	label Sähköposti: 
 	= session.user.email
 	br
+	label Käyttäjätunnus: 
+	- if(session.user.name)
+		= session.user.name
+	- else
+		i Asettamatta
+	br
 	a(href='/profile/edit', class='button positive')
 		img(src='/images/blueprint/plugins/buttons/icons/key.png', alt='')
 		| Muokkaa tietoja

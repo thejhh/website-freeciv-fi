@@ -11,16 +11,50 @@ var fs = require('fs'),
 	hash = require('./hash.js'),
     smf = require('./smf.js'),
     mediawiki = require('./mediawiki.js'),
-    core = module.exports = {},
-    argv = require('optimist')
-    .usage('Usage: $0 --users')
-    .demand(['users'])
-    .argv;
+    core = module.exports = {};
 
 core.dbprefix = '';
 
 /* List of users */
 core.listUsers = sql.group(sql.connect(), sql.query('SELECT * FROM '+core.dbprefix+'user ORDER BY user_id'));
+
+// if raw password exists, update other missing password hashs, too
+core.checkPasswords = function(user, next) {
+	var changes = {}, sets=[], fn;
+	
+	// If nothing to do here then skip this
+	if(!user.raw_password) {
+		next();
+		return;
+	}
+	
+	if( (!user.smf_password) && user.name) {
+		changes.smf_password = smf.createPassword(user.raw_password, user.name);
+		sets.push('smf_password = :smf_password');
+	}
+	
+	if(!user.wiki_password) {
+		changes.wiki_password = mediawiki.createPassword(user.raw_password);
+		sets.push('wiki_password = :wiki_password');
+	}
+	
+	if( sets.length === 0 ) {
+		next();
+		return;
+	}
+	
+	// Update missing information from wiki to core database
+	fn = sql.query('UPDATE user SET '+sets.join(', ')+' WHERE user_id = :user_id LIMIT 1');
+	fn({'user_id':user.user_id, 'smf_password':changes.smf_password, 'wiki_password': changes.wiki_password}, function(err) {
+		if(err) {
+			next(err);
+			return;
+		}
+		user.smf_password = changes.smf_password;
+		user.wiki_password = changes.wiki_password;
+		next();
+	});
+};
 
 /* Setups the user into external MediaWiki and SMF */
 core.setupUser = sql.group(
@@ -36,44 +70,7 @@ core.setupUser = sql.group(
 		console.log('');
 		next();
 	},
-	// if raw password exists, update other missing password hashs, too
-	function(user, next) {
-		
-		var changes = {}, sets=[], fn;
-		
-		// If nothing to do here then skip this
-		if(!user.raw_password) {
-			next();
-			return;
-		}
-		
-		if( (!user.smf_password) && user.name) {
-			changes.smf_password = smf.createPassword(user.raw_password, user.name);
-			sets.push('smf_password = :smf_password');
-		}
-		
-		if(!user.wiki_password) {
-			changes.wiki_password = mediawiki.createPassword(user.raw_password);
-			sets.push('wiki_password = :wiki_password');
-		}
-		
-		if( sets.length === 0 ) {
-			next();
-			return;
-		}
-		
-		// Update missing information from wiki to core database
-		fn = sql.query('UPDATE user SET '+sets.join(', ')+' WHERE user_id = :user_id LIMIT 1');
-		fn({'user_id':user.user_id, 'smf_password':changes.smf_password, 'wiki_password': changes.wiki_password}, function(err) {
-			if(err) {
-				next(err);
-				return;
-			}
-			user.smf_password = changes.smf_password;
-			user.wiki_password = changes.wiki_password;
-			next();
-		});
-	},
+	core.checkPasswords,
 	// Check if this user exists in the MediaWiki (by email) and create account if we can
 	function(user, next) {
 		mediawiki.getUserByEmail({'user_email': user.email}, function(err, result) {
@@ -136,6 +133,7 @@ core.setupUser = sql.group(
 			
 		});
 	},
+	core.checkPasswords,
 	// Check if this user exists in the SMF forum (by email) and create account if we can
 	function(user, next) {
 		smf.getMemberByEmail({'email_address': user.email}, function(err, result) {

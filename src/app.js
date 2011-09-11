@@ -12,6 +12,7 @@ var express = require('express'),
 	config = require('./config.js'),
 	site_url = config.url || 'http://game.freeciv.fi',
     sys = require('sys'),
+    core = require('./core.js'),
     util = require('util'),
     sql = require('./sqlmw.js'),
     namespace = require('express-namespace'),
@@ -33,7 +34,7 @@ express.work = function (options) {
 		try {
 			req.work = {};
 		} catch(e) {
-			next(e);
+			next(e||new TypeError('Error'));
 			return;
 		}
 		next();
@@ -51,13 +52,13 @@ express.freeciv = function (options) {
 						throw err;
 					}
 				} catch(e) {
-					next(e);
+					next(e||new TypeError('Error'));
 					return;
 				}
 				next();
 			});
 		} catch(e) {
-			next(e);
+			next(e||new TypeError('Error'));
 		}
 	};
 };
@@ -104,7 +105,7 @@ app.configure(function(){
 			req.flash('error', ''+err.msg);
 			res.render('error_page.jade', {'title':'Virhe tapahtui'} );
 		} catch(e) {
-			next(e);
+			next(e||new TypeError('Error'));
 		}
 	});
 	
@@ -181,17 +182,17 @@ app.param('authKey', function(req, res, next, id){
 						req.work.user_id = data.user_id;
 						req.work.email = req.work.user.email;
 					} catch(e) {
-						next(e);
+						next(e||new TypeError('Error'));
 						return;
 					}
 					next();
 				});
 			} catch(e) {
-				next(e);
+				next(e||new TypeError('Error'));
 			}
 		});
 	} catch(e) {
-		next(e);
+		next(e||new TypeError('Error'));
 	}
 });
 
@@ -210,13 +211,13 @@ app.param('gameTag', function(req, res, next, id){
 				req.work.game_id = data[0].game_id;
 				req.work.game = data[0];
 			} catch(e) {
-				next(e);
+				next(e||new TypeError('Error'));
 				return;
 			}
 			next();
 		});
 	} catch(e) {
-		next(e);
+		next(e||new TypeError('Error'));
 	}
 });
 
@@ -235,17 +236,44 @@ app.param('gameId', function(req, res, next, id){
 				req.work.game_id = game_id;
 				req.work.game = data;
 			} catch(e) {
-				next(e);
+				next(e||new TypeError('Error'));
 				return;
 			}
 			next();
 		});
 	} catch(e) {
-		next(e);
+		next(e||new TypeError('Error'));
 	}
 });
 
 // Middlewares
+
+/* Setup core user data */
+function setupCoreUser() {
+	util.log('setupCoreUser: start');
+	return function(req, res, next) {
+		try {
+			if(!req.work.raw_password) {
+				next();
+				return;
+			}
+			core.setupUser( (function() {
+				var obj = {};
+					foreach(req.session.user).each(function(v, k) {
+						obj[k] = v;
+					});
+					obj['raw_password'] = req.work.raw_password;
+					return obj;
+				})(), function(err) {
+				if(err) {
+					util.log('Error in setupCoreUser: ' + err);
+				}
+			});
+		} catch(e) {
+			next(e||new TypeError('Error'));
+		}
+	};
+}
 
 /* Validate and prepare login */
 function prepLoginAuth() {
@@ -285,30 +313,19 @@ function prepLoginAuth() {
 							req.session.user = data[0];
 							util.log('prepLoginAuth: User logged in as ' + sys.inspect(req.session.user));
 							req.flash('info', 'Sisäänkirjautuminen onnistui.');
-							core.setupUser( (function() {
-									var obj = {};
-									foreach(req.session.user).each(function(v, k) {
-										obj[k] = v;
-									});
-									obj['raw_password'] = raw_password;
-									return obj;
-								})(), function(err) {
-								if(err) {
-									console.log('Error in setupUser: ' + err);
-								}
-							});
+							req.work.raw_password = raw_password;
 						} catch(e) {
-							next(e);
+							next(e|||new TypeError('Error'));
 							return;
 						}
 						next();
 					});
 				} catch(e) {
-					next(e);
+					next(e||new TypeError('Error'));
 				}
 			});
 		} catch(e) {
-			next(e);
+			next(e||new TypeError('Error'));
 		}
 	};
 }
@@ -322,7 +339,7 @@ function logout() {
 			delete req.session.user;
 			req.flash('info', 'Olet nyt kirjautunut ulos.');
 		} catch(e) {
-			next(e);
+			next(e||new TypeError('Error'));
 			return;
 		}
 		next();
@@ -338,7 +355,7 @@ function checkAuth() {
 			}
 			util.log('checkAuth: successful');
 		} catch(e) {
-			next(e);
+			next(e||new TypeError('Error'));
 			return;
 		}
 		next();
@@ -362,7 +379,7 @@ function prepBodyEmail(key) {
 			}
 			req.work[key] = email;
 		} catch(e) {
-			next(e);
+			next(e||new TypeError('Error'));
 			return;
 		}
 		next();
@@ -388,7 +405,33 @@ function prepBodyPasswords(key1, key2) {
 			}
 			req.work[key1] = pw1;
 		} catch(e) {
-			next(e);
+			next(e||new TypeError('Error'));
+			return;
+		}
+		next();
+	};
+}
+
+/* Validate and prepare name keyword */
+function prepBodyName(key1) {
+	key1 = key1 || 'name';
+	return function(req, res, next) {
+		try {
+			if( (!req.body[key1])  ) {
+				next();
+				return;
+			}
+			if(req.session.user.name) {
+				next();
+				return;
+			}
+			var name = trim(""+req.body[key1]);
+			if(name.length < 3) {
+				throw new WebError("Käyttäjätunnuksen tulee olla vähintään kolme (3) merkkiä pitkä");
+			}
+			req.work[key1] = name;
+		} catch(e) {
+			next(e||new TypeError('Error'));
 			return;
 		}
 		next();
@@ -420,13 +463,13 @@ function prepSQLRowBy(table, key) {
 					req.work[table+"_id"] = row[table+"_id"];
 					req.work[table] = row;
 				} catch(e) {
-					next(e);
+					next(e||new TypeError('Error'));
 					return;
 				}
 				next();
 			});
 		} catch(e) {
-			next(e);
+			next(e||new TypeError('Error'));
 		}
 	};
 }
@@ -456,7 +499,7 @@ function prepRename(next_key, prev_key) {
 			req.work[next_key] = lookup(req);
 			util.log('prepRename: req.work['+next_key+'] set to ' + sys.inspect(req.work[next_key]));
 		} catch(e) {
-			next(e);
+			next(e||new TypeError('Error'));
 			return;
 		}
 		next();
@@ -476,7 +519,8 @@ function updateSQLRow(table, keys) {
 			
 			var where = {},
 			    what = {}, 
-			    id_key = table+"_id";
+			    id_key = table+"_id",
+			    changes = 0;
 			
 			if(!req.work[id_key]) {
 				throw new Error("request has no key: " + id_key);
@@ -485,17 +529,23 @@ function updateSQLRow(table, keys) {
 			
 			try {
 				foreach(keys).each(function(k) {
-					if(!req.work[k]) {
-						throw new TypeError("request has no key: " + k);
+					if(req.work[k] !== undefined) {
+						console.log('what[' + sys.inspect(k) + '] = ' + sys.inspect(req.work[k]));
+						what[k] = req.work[k];
+						changes += 1;
 					}
-					what[k] = req.work[k];
 				});
 			} catch(e) {
-				next(e);
+				next(e||new TypeError('Error'));
 				return;
 			}
 			if(!tables[table]) {
 				throw new Error('table missing: ' + table);
+			}
+			
+			if(changes === 0) {
+				next();
+				return;
 			}
 			
 			util.log('updateSQLRow: Updating SQL...');
@@ -506,13 +556,13 @@ function updateSQLRow(table, keys) {
 					}
 					req.flash('info', 'Tiedot päivitetty onnistuneesti.');
 				} catch(e) {
-					next(e);
+					next(e||new TypeError('Error'));
 					return;
 				}
 				next();
 			});
 		} catch(e2) {
-			next(e2);
+			next(e2||new TypeError('Error'));
 		}
 	};
 }
@@ -534,13 +584,13 @@ function createAuthKey(email_key) {
 					}
 					req.work.authKey = key;
 				} catch(e) {
-					next(e);
+					next(e||new TypeError('Error'));
 					return;
 				}
 				next();
 			});
 		} catch(e) {
-			next(e);
+			next(e||new TypeError('Error'));
 		}
 	};
 }
@@ -574,7 +624,7 @@ function removeAuthKey(key) {
 				}
 			});
 		} catch(e) {
-			next(e);
+			next(e||new TypeError('Error'));
 			return;
 		}
 		next();
@@ -603,7 +653,7 @@ function sendEmailAuthKey(soft) {
 						req.flash('info', 'Vahvistusviesti lähetetty onnistuneesti.');
 					}
 				} catch(e){
-					next(e);
+					next(e||new TypeError('Error'));
 					return;
 				}
 				next();
@@ -761,17 +811,17 @@ function prepCurrentUserID(key) {
 				}
 				
 				// 2) Try to add a new user if not logged in
-				console.log('Creating user with email ' + req.work.email);
+				util.log('Creating user with email ' + req.work.email);
 				tables.user.insert({'email':req.work.email}, function(err, user_id) {
 					try {
 						if(err) {
 							throw WebError('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.', err);
 						}
-						console.log('Created user #' + user_id);
+						util.log('Created user #' + user_id);
 						req.work.user_id = user_id;
 						req.flash('info', 'Käyttäjätunnus lisätty.');
 					} catch(e) {
-						next(e);
+						next(e||new TypeError('Error'));
 						return;
 					}
 					next();
@@ -781,7 +831,7 @@ function prepCurrentUserID(key) {
 			
 		} catch(e) {
 			if(e) {
-				next(e);
+				next(e||new TypeError('Error'));
 			} else {
 				next();
 			}
@@ -813,17 +863,17 @@ function addReg(key) {
 							}
 							req.flash('info', 'Teidät on nyt lisätty peliin.');
 						} catch(e) {
-							next(e);
+							next(e||new TypeError('Error'));
 							return;
 						}
 						next();
 					});
 				} catch(e) {
-					next(e);
+					next(e||new TypeError('Error'));
 				}
 			});
 		} catch(e) {
-			next(e);
+			next(e||new TypeError('Error'));
 		}
 	};
 }
@@ -846,13 +896,13 @@ function delReg(key) {
 					}
 					req.flash('info', 'Pelivaraus on nyt poistettu.');
 				} catch(e) {
-					next(e);
+					next(e||new TypeError('Error'));
 					return;
 				}
 				next();
 			});
 		} catch(e) {
-			next(e);
+			next(e||new TypeError('Error'));
 		}
 	};
 }
@@ -874,14 +924,14 @@ function delPlayer() {
 					}
 					req.flash('info', 'Teidät on poistettu pelistä.');
 				} catch(e) {
-					next(e);
+					next(e||new TypeError('Error'));
 					return;
 				}
 				next();
 			});
 		} catch(e) {
 			if(e) {
-				next(e);
+				next(e||new TypeError('Error'));
 			} else {
 				next();
 			}
@@ -896,7 +946,7 @@ function redirect(where) {
 		try {
 			res.redirect(where);
 		} catch(e) {
-			next(e);
+			next(e||new TypeError('Error'));
 		}
 	};
 }
@@ -922,13 +972,13 @@ function prepRegData() {
 					req.work.reg_id = rows[0].reg_id;
 					req.work.reg = rows[0];
 				} catch(e) {
-					next(e);
+					next(e||new TypeError('Error'));
 					return;
 				}
 				next();
 			});
 		} catch(e) {
-			next(e);
+			next(e||new TypeError('Error'));
 		}
 	};
 }
@@ -955,7 +1005,7 @@ function prepPlayerData() {
 					req.work.player = rows[0];
 				} catch(e) {
 					if(e) {
-						next(e);
+						next(e||new TypeError('Error'));
 					} else {
 						next();
 					}
@@ -965,7 +1015,7 @@ function prepPlayerData() {
 			});
 		} catch(e) {
 			if(e) {
-				next(e);
+				next(e||new TypeError('Error'));
 			} else {
 				next();
 			}
@@ -993,7 +1043,7 @@ function prepPlayerAuthData() {
 					req.work.auth = rows[0];
 				} catch(e) {
 					if(e) {
-						next(e);
+						next(e||new TypeError('Error'));
 					} else {
 						next();
 					}
@@ -1003,7 +1053,7 @@ function prepPlayerAuthData() {
 			});
 		} catch(e) {
 			if(e) {
-				next(e);
+				next(e||new TypeError('Error'));
 			} else {
 				next();
 			}
@@ -1043,7 +1093,7 @@ function setupPlayer(key) {
 								req.work.player_id = rows[0].player_id;
 								req.flash('info', 'Pelaajan tiedot päivitetty.');
 							} catch(e) {
-								next(e);
+								next(e||new TypeError('Error'));
 								return;
 							}
 							next();
@@ -1057,18 +1107,18 @@ function setupPlayer(key) {
 								req.work.player_id = player_id;
 								req.flash('info', 'Pelaajan tiedot lisätty.');
 							} catch(e) {
-								next(e);
+								next(e||new TypeError('Error'));
 								return;
 							}
 							next();
 						});
 					}
 				} catch(e) {
-					next(e);
+					next(e||new TypeError('Error'));
 				}
 			});
 		} catch(e) {
-			next(e);
+			next(e||new TypeError('Error'));
 		}
 	};
 }
@@ -1106,13 +1156,13 @@ function prepFreecivData(key) {
 					
 					req.work.free_nations = free_nations;
 				} catch(e) {
-					next(e);
+					next(e||new TypeError('Error'));
 					return;
 				}
 				next();
 			});
 		} catch(e) {
-			next(e);
+			next(e||new TypeError('Error'));
 		}
 	};
 }
@@ -1135,7 +1185,7 @@ app.namespace('/login', function(){
 	});
 	
 	/* Handle login process */
-	app.post('/', prepLoginAuth(), checkAuth(), redirect(site_url+'/'));
+	app.post('/', prepLoginAuth(), setupCoreUser(), checkAuth(), redirect(site_url+'/'));
 
 	/* Display login page */
 	app.get('/', function(req, res){
@@ -1161,12 +1211,12 @@ app.namespace('/act/:authKey', function(){
 				req.body.email = req.work.email;
 				req.body.password = req.work.password;
 			} catch(e) {
-				next(e);
+				next(e||new TypeError('Error'));
 				return;
 			}
 			next();
 		},
-		prepLoginAuth('/login'), checkAuth(), redirect(site_url+'/profile') );
+		prepLoginAuth('/login'), setupCoreUser(), checkAuth(), redirect(site_url+'/profile') );
 	
 }); // end of /act/:authKey
 
@@ -1185,8 +1235,16 @@ app.namespace('/profile', function(){
 	});
 	
 	/* User profile page */
-	app.post('/edit', checkAuth(), prepBodyPasswords(), prepRename('user_id', 'session.user.user_id'), updateSQLRow('user', ['password']), redirect(site_url+'/profile'));
-
+	app.post('/edit', checkAuth(), prepBodyPasswords(), prepBodyName(), 
+		prepRename('user_id', 'session.user.user_id'), updateSQLRow('user', ['password', 'name']), 
+		function(req, res, next){
+			if(req.session && req.session.user && (!req.session.user.name) && req.work.name) {
+				req.session.user.name = req.work.name;
+			}
+			next();
+		},
+		redirect(site_url+'/profile'));
+	
 	/* User profile page */
 	app.get('/edit', checkAuth(), function(req, res){
 		res.render('profile/edit', {title: 'Muokkaa tietojasi'});

@@ -5,6 +5,13 @@ form(method='post', action='/profile/edit')
 		label Sähköposti: 
 		= session.user.email
 		br
+		label Käyttäjätunnus: 
+		- if(session.user.name)
+			= session.user.name
+		- else
+			br
+			input(type='text', name='name', value='')
+		br
 		label Salasana:
 		br
 		input(type='password', name='password', value='')
@@ -20,3 +27,9 @@ form(method='post', action='/profile/edit')
 		a(href='index', class='button negative')
 			img(src='/images/blueprint/plugins/buttons/icons/cross.png', alt='')
 			| Peruuta
+		hr
+		| Käyttäjätunnus toimii
+		a(href='http://freeciv.fi/wiki',target='_blank') wikissä
+		|  ja 
+		a(href='http://forum.freeciv.fi',target='_blank') foorumilla
+		| .
