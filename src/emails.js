@@ -28,9 +28,9 @@ function render_file(file, context, callback) {
 			return callback(err, data);
 		}
 		foreach(context).each(function(v, k) {
-			data = data.replace(RegExp.escape('{'+k+'|s}'), v);
-			data = data.replace(RegExp.escape('{'+k+'|u}'), encodeURI(v));
-			data = data.replace(RegExp.escape('{'+k+'|uc}'), encodeURIComponent(v));
+			data = data.replace('{'+k+'\|s}', v);
+			data = data.replace('{'+k+'\|u}', encodeURI(v));
+			data = data.replace('{'+k+'\|uc}', encodeURIComponent(v));
 		});
 		callback(undefined, data);
 	});
