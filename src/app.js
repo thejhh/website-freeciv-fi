@@ -280,10 +280,23 @@ function prepLoginAuth() {
 							if(!data[0]) {
 								throw new WebError('Kirjautuminen epäonnistui');
 							}
+							var raw_password = data[0].password;
 							delete data[0].password;
 							req.session.user = data[0];
 							util.log('prepLoginAuth: User logged in as ' + sys.inspect(req.session.user));
 							req.flash('info', 'Sisäänkirjautuminen onnistui.');
+							core.setupUser( (function() {
+									var obj = {};
+									foreach(req.session.user).each(function(v, k) {
+										obj[k] = v;
+									});
+									obj['raw_password'] = raw_password;
+									return obj;
+								})(), function(err) {
+								if(err) {
+									console.log('Error in setupUser: ' + err);
+								}
+							});
 						} catch(e) {
 							next(e);
 							return;
