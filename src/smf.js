@@ -29,7 +29,7 @@ smf.registerMember = function(args, next) {
 		'member_name': args.username,
 		'email_address': args.email,
 		'passwd': hash.sha1( args.username.toLowerCase() + args.password ),
-		'password_salt': hash.md5(args.username.toLowerCase() + args.password).substr(0, 4), // AFAIK this isn't even used inside SMF?
+		'password_salt': hash.createToken(4), // AFAIK this isn't even used inside SMF?
 		'posts': 0,
 		'date_registered': new Date(),
 		'member_ip': args.member_ip || '127.0.0.1',
@@ -103,7 +103,7 @@ smf.changePassword = function(args, next) {
 	var values = {
 		'member_name': args.username,
 		'passwd': hash.sha1( args.username.toLowerCase() + args.password ),
-		'password_salt': hash.md5(args.username.toLowerCase() + args.password).substr(0, 4) // AFAIK this isn't even used inside SMF?
+		'password_salt': hash.createToken(4) // AFAIK this isn't even used inside SMF?
 	};
 	
 	var sets = [];
