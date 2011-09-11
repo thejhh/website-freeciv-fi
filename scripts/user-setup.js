@@ -127,7 +127,9 @@ if(argv.users) {
 			return;
 		}
 		var rows = result._rows, actions = [];
+		console.log('Preparing actions... rows.length = ' + rows.length);
 		foreach(rows).each(function(row) {
+			console.log('Preparing user #' + row.user_id + '...');
 			actions.push(function(state, next) {
 				console.log('Running user #' + row.user_id + '...');
 				setupUser(row, function(err) {
