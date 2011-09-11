@@ -13,7 +13,7 @@ mediawiki.dbprefix = 'wiki_';
 /* Create hashed password (in Mediawiki's B-style) */
 mediawiki.createPassword = function(password, salt) {
 	salt = salt || hash.createToken(8);
-	return ':B:' + salt + ':' + hash.md5( salt + '-' + hash.md5( args.password ) );
+	return ':B:' + salt + ':' + hash.md5( salt + '-' + hash.md5( password ) );
 };
 
 /* Default options for new users */
