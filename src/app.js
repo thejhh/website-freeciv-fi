@@ -24,6 +24,7 @@ var express = require('express'),
     emails = require('./emails.js'),
     freeciv = require('./freeciv.js'),
     FileStore = require('./FileStore.js')(express),
+    WebError = require('./WebError.js'),
     client;
 
 /* Support for request.work */
@@ -68,20 +69,6 @@ process.umask(77);
 
 params.extend(app);
 
-function WebError(msg, orig){
-	this.name = 'WebError';
-	this.msg = ""+msg;
-	this.orig = orig;
-	Error.call(this, ""+msg);
-	Error.captureStackTrace(this, arguments.callee);
-}
-
-WebError.prototype.__proto__ = Error.prototype;
-
-WebError.prototype.toString = function() {
-	return this.name + ": " + this.msg;
-};
-
 app.configure(function(){
 	var secret = (config && config.session && config.session.secret) || 'keyboard cat';
 	
@@ -95,9 +82,9 @@ app.configure(function(){
 	app.use(express.cookieParser());
 	app.use(express.work());
 	app.use(express.freeciv());
-	app.use(express.session({ 'secret':secret, 'store':new FileStore }));
+	app.use(express.session({ 'secret':secret, 'store':new FileStore() }));
 	app.use(app.router);
-	app.use(express.static(__dirname + '/public'));
+	app.use(express['static'](__dirname + '/public'));
 	
 	app.error(function(err, req, res, next){
 		try {
@@ -147,9 +134,9 @@ app.dynamicHelpers({
 		return req.flash();
 	},
 	param: function(req, res){
-		return (function(key, def) {
+		return function(key, def) {
 			return req.param(key, def);
-		});
+		};
 	}
 });
 
@@ -263,14 +250,14 @@ app.param('gameId', function(req, res, next, id){
 /* Validate and prepare login */
 function prepLoginAuth() {
 	util.log('prepLoginAuth: start');
-	return (function(req, res, next) {
+	return function(req, res, next) {
 		try {
 			util.log('prepLoginAuth: call to instance');
 			util.log('prepLoginAuth: req.body = ' + sys.inspect(req.body));
-			if(!req.body["email"]) {
+			if(!req.body.email) {
 				throw new WebError("Kirjautuminen epäonnistui");
 			}
-			if(!req.body["password"]) {
+			if(!req.body.password) {
 				throw new WebError("Kirjautuminen epäonnistui");
 			}
 			var email = ""+req.body.email,
@@ -310,13 +297,13 @@ function prepLoginAuth() {
 		} catch(e) {
 			next(e);
 		}
-	});
+	};
 }
 
 /* Logout */
 function logout() {
 	util.log('logout: start');
-	return (function(req, res, next) {
+	return function(req, res, next) {
 		try {
 			util.log('logout: call to instance');
 			delete req.session.user;
@@ -326,12 +313,12 @@ function logout() {
 			return;
 		}
 		next();
-	});
+	};
 }
 
 /* Check that user has logged in */
 function checkAuth() {
-	return (function(req, res, next) {
+	return function(req, res, next) {
 		try {
 			if(!(req.session && req.session.user)) {
 				throw new WebError("Tämä toiminto vaatii sisäänkirjautumisen.", 'checkAuth: failed');
@@ -342,13 +329,13 @@ function checkAuth() {
 			return;
 		}
 		next();
-	});
+	};
 }
 
 /* Validate and prepare email keyword */
 function prepBodyEmail(key) {
-	var key = key || 'email';
-	return (function(req, res, next) {
+	key = key || 'email';
+	return function(req, res, next) {
 		try {
 			if(!req.body[key]) {
 				throw new WebError("Sähköpostiosoite puuttuu");
@@ -366,20 +353,20 @@ function prepBodyEmail(key) {
 			return;
 		}
 		next();
-	});
+	};
 }
 
 /* Validate and prepare password keywords */
 function prepBodyPasswords(key1, key2) {
-	var key1 = key1 || 'password',
-	    key2 = key2 || 'password2';
-	return (function(req, res, next) {
+	key1 = key1 || 'password';
+	key2 = key2 || 'password2';
+	return function(req, res, next) {
 		try {
 			if(!(req.body[key1] && req.body[key2])) {
 				throw new WebError("Toinen salasanoista puuttuu");
 			}
-			var pw1 = ""+req.body[key1];
-			var pw2 = ""+req.body[key2];
+			var pw1 = ""+req.body[key1],
+			    pw2 = ""+req.body[key2];
 			if(pw1.length < 8) {
 				throw new WebError("Salasanan tulee olla vähintään kahdeksan (8) merkkiä pitkä");
 			}
@@ -392,14 +379,14 @@ function prepBodyPasswords(key1, key2) {
 			return;
 		}
 		next();
-	});
+	};
 }
 
 /* Validate and prepare data by keyword */
 function prepSQLRowBy(table, key) {
-	var table = table || 'user',
-	    key = key || table+"_id";
-	return (function(req, res, next) {
+	table = table || 'user';
+	key = key || table+"_id";
+	return function(req, res, next) {
 		try {
 			if(!req.work[key]) {
 				throw new Error("request has no key: " + key);
@@ -428,14 +415,14 @@ function prepSQLRowBy(table, key) {
 		} catch(e) {
 			next(e);
 		}
-	});
+	};
 }
 
 /* Relink request property also as next key */
 function prepRename(next_key, prev_key) {
 	var keys = (""+prev_key).split(".");
 	util.log('prepRename: keys = ' + sys.inspect(keys));
-	return (function(req, res, next) {
+	return function(req, res, next) {
 		try {
 			function lookup(obj) {
 				util.log('prepRename: keys = ' + sys.inspect(keys));
@@ -460,14 +447,12 @@ function prepRename(next_key, prev_key) {
 			return;
 		}
 		next();
-	});
+	};
 }
 
 /* Update SQL rows */
 function updateSQLRow(table, keys) {
-	var table = table,
-	    keys = keys;
-	return (function(req, res, next) {
+	return function(req, res, next) {
 		try {
 			if(!table) {
 				throw new Error('table missing');
@@ -513,16 +498,16 @@ function updateSQLRow(table, keys) {
 				}
 				next();
 			});
-		} catch(e) {
-			next(e);
+		} catch(e2) {
+			next(e2);
 		}
-	});
+	};
 }
 
 /* Create authKey */
 function createAuthKey(email_key) {
-	var email_key = email_key || 'email';
-	return (function(req, res, next) {
+	email_key = email_key || 'email';
+	return function(req, res, next) {
 		try {
 			var email = req.work[email_key],
 			    user_id = req.work.user_id;
@@ -544,13 +529,13 @@ function createAuthKey(email_key) {
 		} catch(e) {
 			next(e);
 		}
-	});
+	};
 }
 
 /* Remove authKey */
 function removeAuthKey(key) {
-	var key = key || 'authKey';
-	return (function(req, res, next) {
+	key = key || 'authKey';
+	return function(req, res, next) {
 		try {
 			var authKey = req.work[key];
 			if(!authKey) {
@@ -580,12 +565,12 @@ function removeAuthKey(key) {
 			return;
 		}
 		next();
-	});
+	};
 }
 
 /* Send authKey using email */
 function sendEmailAuthKey(soft) {
-	return (function(req, res, next) {
+	return function(req, res, next) {
 		try {
 			if(soft) {
 				if(!req.work.authKey) {
@@ -616,7 +601,7 @@ function sendEmailAuthKey(soft) {
 			}
 			next();
 		}
-	});
+	};
 }
 
 /* Update information about registration in current game for current user */
@@ -739,7 +724,7 @@ function updateGamePlayerList() {
  * 2) Try to add a new user if not logged in
 */
 function prepCurrentUserID(key) {
-	var key = key || 'email';
+	key = key || 'email';
 	return function(req, res, next) {
 		try {
 			// 1) Use current user if logged in
@@ -793,10 +778,10 @@ function prepCurrentUserID(key) {
 
 /* Do a registration to the game */
 function addReg(key) {
-	var key = key || 'user_id';
+	key = key || 'user_id';
 	return function(req, res, next) {
 		try {
-			if(!req.work['game_id']) {
+			if(!req.work.game_id) {
 				throw new TypeError("addReg: req.work.game_id was not prepared!");
 			}
 			if(!req.work[key]) {
@@ -832,10 +817,10 @@ function addReg(key) {
 
 /* Do unregistration from the game */
 function delReg(key) {
-	var key = key || 'user_id';
+	key = key || 'user_id';
 	return function(req, res, next) {
 		try {
-			if(!req.work['game_id']) {
+			if(!req.work.game_id) {
 				throw new TypeError("delReg: req.work.game_id was not prepared!");
 			}
 			if(!req.work[key]) {
@@ -863,10 +848,10 @@ function delReg(key) {
 function delPlayer() {
 	return function(req, res, next) {
 		try {
-			if(!req.work['game_id']) {
+			if(!req.work.game_id) {
 				throw new TypeError("delPlayer: req.work.game_id was not prepared!");
 			}
-			if(!req.work['reg_id']) {
+			if(!req.work.reg_id) {
 				throw "";
 			}
 			tables.player.del().where({'game_id':req.work.game_id, 'reg_id':req.work.reg_id}).limit(1).exec(function(err) {
@@ -893,7 +878,7 @@ function delPlayer() {
 
 /* Redirect to somewhere. By default redirects back. */
 function redirect(where) {
-	var where = where || 'back';
+	where = where || 'back';
 	return function(req, res, next) {
 		try {
 			res.redirect(where);
@@ -907,10 +892,10 @@ function redirect(where) {
 function prepRegData() {
 	return function(req, res, next) {
 		try {
-			if(!req.work['game_id']) {
+			if(!req.work.game_id) {
 				throw new TypeError("prepRegData: req.work.game_id was not prepared!");
 			}
-			if(!req.work['user_id']) {
+			if(!req.work.user_id) {
 				throw new TypeError("prepRegData: req.work.user_id was not prepared!");
 			}
 			tables.reg.select('*').where({'game_id':req.work.game_id, 'user_id':req.work.user_id}).limit(1).exec(function(err, rows) {
@@ -921,7 +906,7 @@ function prepRegData() {
 					if(!(rows && rows[0])) {
 						throw new WebError('Virhe tietokantayhteydessä. Yritä hetken kuluttua uudelleen.', err);
 					}
-					req.work.reg_id = rows[0]['reg_id'];
+					req.work.reg_id = rows[0].reg_id;
 					req.work.reg = rows[0];
 				} catch(e) {
 					next(e);
@@ -939,10 +924,10 @@ function prepRegData() {
 function prepPlayerData() {
 	return function(req, res, next) {
 		try {
-			if(!req.work['game_id']) {
+			if(!req.work.game_id) {
 				throw new TypeError("prepPlayerData: req.work.game_id was not prepared!");
 			}
-			if(!req.work['reg_id']) {
+			if(!req.work.reg_id) {
 				throw "";
 			}
 			tables.player.select('*').where({'game_id':req.work.game_id, 'reg_id':req.work.reg_id}).limit(1).exec(function(err, rows) {
@@ -953,7 +938,7 @@ function prepPlayerData() {
 					if(!(rows && rows[0])) {
 						throw "";
 					}
-					req.work.player_id = rows[0]['player_id'];
+					req.work.player_id = rows[0].player_id;
 					req.work.player = rows[0];
 				} catch(e) {
 					if(e) {
@@ -979,7 +964,7 @@ function prepPlayerData() {
 function prepPlayerAuthData() {
 	return function(req, res, next) {
 		try {
-			if(!req.work['game_id']) {
+			if(!req.work.game_id) {
 				throw new TypeError("prepPlayerAuthData: req.work.game_id was not prepared!");
 			}
 			var user_id = req.session && req.session.user && req.session.user.user_id;
@@ -991,7 +976,7 @@ function prepPlayerAuthData() {
 					if(!(rows && rows[0])) {
 						throw "";
 					}
-					req.work.auth_id = rows[0]['auth_id'];
+					req.work.auth_id = rows[0].auth_id;
 					req.work.auth = rows[0];
 				} catch(e) {
 					if(e) {
@@ -1025,10 +1010,10 @@ function setupPlayer(key) {
 			if(name.length === 0) {
 				throw new WebError('Hallitsijan nimi valitsematta');
 			}
-			if(!req.work['game_id']) {
+			if(!req.work.game_id) {
 				throw new TypeError("setupPlayer: req.work.player_id was not prepared!");
 			}
-			if(!req.work['reg_id']) {
+			if(!req.work.reg_id) {
 				throw new TypeError("setupPlayer: req.work.reg_id was not prepared!");
 			}
 			tables.player.select('*').where({'game_id':req.work.game_id, 'reg_id':req.work.reg_id}).limit(1).exec(function(err, rows) {

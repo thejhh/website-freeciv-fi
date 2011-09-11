@@ -11,9 +11,10 @@
 var sys = require('sys'),
     foreach = require('snippets').foreach,
     config = require('./config.js'),
-    _db = require('./couchdb.js').sessions;
+    _db = require('./couchdb.js').sessions,
+	proto = '__proto__';
 
-module.exports = (function(connect) {
+module.exports = function(connect) {
 	
 	var Store = connect.session.Store;
 	
@@ -22,51 +23,63 @@ module.exports = (function(connect) {
 		Store.call(this, options);
 	}
 	
-	CouchStore.prototype.__proto__ = Store.prototype;
+	CouchStore.prototype[proto] = Store.prototype;
 	
-	CouchStore.prototype.get = (function(sid, callback) {
+	CouchStore.prototype.get = function(sid, callback) {
 		try {
 			console.log('Fetching sid = ' + sys.inspect(sid));
 			_db.get(sid, function (err, doc) {
 				console.log('Fetched doc = ' + sys.inspect(doc));
-				var undefined, data = {};
-				if( (!doc) || (err && (err.error === 'not_found') && (err.reason==='missing')) ) return callback();
-				if(err) return callback(sys.inspect(err));
+				var data = {};
+				if( (!doc) || (err && (err.error === 'not_found') && (err.reason==='missing')) ) {
+					return callback();
+				}
+				if(err) {
+					return callback(sys.inspect(err));
+				}
 				foreach(doc).each(function(v, k) { data[k] = v; });
 				callback(null, data);
 			});
 		} catch(e) {
 			callback(e);
 		}
-	});
+	};
 	
-	CouchStore.prototype.set = (function(sid, session, callback) {
-		var undefined;
+	CouchStore.prototype.set = function(sid, session, callback) {
 		try {
 			console.log('Saving sid = ' + sys.inspect(sid) + ', session = ' + sys.inspect(session));
 			_db.save(sid, session, function (err, res) {
 				if (err) {
-					callback && callback(sys.inspect(err));
+					if(callback) {
+						callback(sys.inspect(err));
+					}
 					return;
 				}
-				callback && callback();
+				if(callback) {
+					callback();
+				}
 			});
 		} catch(e) {
-			if(callback) callback(e);
-			else console.log('Error: ' + e);
+			if(callback) {
+				callback(e);
+			} else {
+				console.log('Error: ' + e);
+			}
 		}
-	});
+	};
 	
-	CouchStore.prototype.destroy = (function(sid, callback) {
+	CouchStore.prototype.destroy = function(sid, callback) {
 		_db.get(sid, function (err, doc) {
-			var undefined;
-			if(err) { callback(sys.inspect(err)); return; }
+			if(err) {
+				callback(sys.inspect(err));
+				return;
+			}
 			_db.remove(sid, doc._rev, function (err, res) {
 				callback(sys.inspect(err));
 			});
 		});
 
-	});
+	};
 	
 	/*
 	CouchStore.prototype.length = function(fn){
@@ -79,6 +92,6 @@ module.exports = (function(connect) {
 	*/
 	
 	return CouchStore;
-});
+};
 
 /* EOF */

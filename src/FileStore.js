@@ -11,9 +11,10 @@
 var sys = require('sys'),
     fs = require('fs');
 
-module.exports = (function(connect) {
+module.exports = function(connect) {
 	
-	var Store = connect.session.Store;
+	var Store = connect.session.Store,
+	    proto = '__proto__';
 	
 	function FileStore(options) {
 		options = options || {};
@@ -21,25 +22,25 @@ module.exports = (function(connect) {
 		this.session_dir = options.session_dir || './sessions';
 	}
 	
-	FileStore.prototype.__proto__ = Store.prototype;
+	FileStore.prototype[proto] = Store.prototype;
 	
-	FileStore.prototype.get = (function(sid, callback) {
+	FileStore.prototype.get = function(sid, callback) {
 		try {
 			//console.log('Fetching sid = ' + sys.inspect(sid));
 			fs.readFile(this.session_dir + '/sess-' + sid + '.json', 'UTF-8', function (err, data) {
 				//console.log('Fetched  = ' + sys.inspect(doc));
-				var undefined;
-				if((!data) || err) return callback();
+				if((!data) || err) {
+					return callback();
+				}
 				//if(err) return callback(sys.inspect(err));
 				callback(null, JSON.parse(data) );
 			});
 		} catch(e) {
 			callback(e);
 		}
-	});
+	};
 	
-	FileStore.prototype.set = (function(sid, session, callback) {
-		var undefined;
+	FileStore.prototype.set = function(sid, session, callback) {
 		try {
 			/*
 			var maxAge = session.cookie.maxAge,
@@ -49,22 +50,29 @@ module.exports = (function(connect) {
 			//console.log('Saving sid = ' + sys.inspect(sid) + ', session = ' + sys.inspect(session));
 			fs.writeFile(this.session_dir + '/sess-' + sid + '.json', JSON.stringify(session), function (err, res) {
 				if (err) {
-					callback && callback(sys.inspect(err));
+					if(callback) {
+						callback(sys.inspect(err));
+					}
 					return;
 				}
-				callback && callback();
+				if(callback) {
+					callback();
+				}
 			});
 		} catch(e) {
-			if(callback) callback(e);
-			else console.log('Error: ' + e);
+			if(callback) {
+				callback(e);
+			} else {
+				console.log('Error: ' + e);
+			}
 		}
-	});
+	};
 	
-	FileStore.prototype.destroy = (function(sid, callback) {
+	FileStore.prototype.destroy = function(sid, callback) {
 		fs.remove(this.session_dir + '/sess-' + sid + '.json', function (err, res) {
 			callback(sys.inspect(err));
 		});
-	});
+	};
 	
 	/*
 	FileStore.prototype.length = function(fn){
@@ -77,6 +85,6 @@ module.exports = (function(connect) {
 	*/
 	
 	return FileStore;
-});
+};
 
 /* EOF */

@@ -12,6 +12,10 @@ var nodemailer = require('nodemailer'),
 	util = require('util'),
     _lib = module.exports = {};
 
+RegExp.escape = function(text) {
+	return text.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&");
+};
+
 // one time action to set up SMTP information
 nodemailer.SMTP = config.smtp || {};
 
@@ -24,9 +28,9 @@ function render_file(file, context, callback) {
 			return callback(err, data);
 		}
 		foreach(context).each(function(v, k) {
-			data = data.replace('{'+k+'\|s}', v);
-			data = data.replace('{'+k+'\|u}', encodeURI(v));
-			data = data.replace('{'+k+'\|uc}', encodeURIComponent(v));
+			data = data.replace(RegExp.escape('{'+k+'|s}'), v);
+			data = data.replace(RegExp.escape('{'+k+'|u}'), encodeURI(v));
+			data = data.replace(RegExp.escape('{'+k+'|uc}'), encodeURIComponent(v));
 		});
 		callback(undefined, data);
 	});
