@@ -3,11 +3,6 @@
 var crypto = require('crypto'),
     hash = module.exports = {};
 
-/* Create random hexadecimal token */
-hash.createToken = function(chars) {
-	return md5(''+Math.random(0, 0x7fffffff)).substr(0, chars || 32);
-};
-
 /* Create hash */
 hash.create = function createHash(str, algorithm, encoding) {
 	var shasum = crypto.createHash(algorithm || 'sha1');
@@ -24,5 +19,10 @@ hash.sha1 = function(str, encoding) {
 hash.md5 = function(str, encoding) {
 	return hash.create(str, 'md5', encoding || 'hex');
 }
+
+/* Create random hexadecimal token */
+hash.createToken = function(chars) {
+	return hash.md5(''+Math.random(0, 0x7fffffff)).substr(0, chars || 32);
+};
 
 /* EOF */
