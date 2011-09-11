@@ -429,7 +429,7 @@ function prepBodyName(key1) {
 				next();
 				return;
 			}
-			var name = trim(""+req.body[key1]);
+			var name = trim(""+req.body[key1]).toLowerCase();
 			if(name.length < 3) {
 				throw new WebError("Käyttäjätunnuksen tulee olla vähintään kolme (3) merkkiä pitkä");
 			}
