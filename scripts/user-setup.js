@@ -135,6 +135,12 @@ if(argv.users) {
 		var rows = result._rows, actions = [];
 		console.log('Preparing actions... rows.length = ' + rows.length);
 		foreach(rows).each(function(row) {
+			
+			if(!row.password) {
+				console.log('Skipping user #'+ row.user_id + ' because password is not activated.');
+				return;
+			}
+			
 			console.log('Preparing user #' + row.user_id + '...');
 			actions.push(function(state, next) {
 				console.log('Running user #' + row.user_id + '...');
