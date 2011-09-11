@@ -12,6 +12,7 @@ var fs = require('fs'),
  * Required spare_player_number: Spare player number (original reg will be removed from DB)
  */
 var replace_player = sql.group(
+	sql.connect(),
 	sql.query('SELECT user_id AS target_user_id                        FROM reg WHERE number=:target_player_number AND game_id=:game_id'),
 	sql.query('SELECT user_id AS spare_user_id, reg_id AS spare_reg_id FROM reg WHERE number=:spare_player_number AND game_id=:game_id'),
 	sql.query('DELETE FROM player WHERE game_id=:game_id AND reg_id=:spare_reg_id   LIMIT 1'),

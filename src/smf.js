@@ -10,8 +10,8 @@ var fs = require('fs'),
 
 smf.dbprefix = 'smf2_';
 
-/* Register member to database */
-smf.registerMember = function registerMember(args, next) {
+/* Register new member */
+smf.registerMember = function(args, next) {
 	
 	if(!args.username) throw new TypeError('username required');
 	if(!args.email) throw new TypeError('email required');
@@ -86,6 +86,45 @@ smf.registerMember = function registerMember(args, next) {
 	);
 	
 	insert(values, next);
+};
+
+/* Change member password */
+smf.changePassword = function(args, next) {
+	
+	if(!args.username) throw new TypeError('username required');
+	if(!args.password) throw new TypeError('password required');
+	
+	args.username = trim(''+args.username);
+	args.password = trim(''+args.password);
+	
+	if(args.username.length.length < 3) throw new TypeError('username too short!');
+	if(args.password.length < 8) throw new TypeError('password too short!');
+	
+	var values = {
+		'member_name': args.username,
+		'passwd': hash.sha1( args.username.toLowerCase() + args.password ),
+		'password_salt': hash.md5(args.username.toLowerCase() + args.password).substr(0, 4) // AFAIK this isn't even used inside SMF?
+	};
+	
+	var sets = [];
+	foreach(['passwd', 'password_salt']).each(function(k) {
+		sets.push(k + ' = :' + k);
+	});
+	
+	var update = sql.group(
+		sql.connect(),
+		sql.query('SELECT id_member FROM '+smf.dbprefix+'members WHERE member_name = :member_name LIMIT 1'),
+		function(state, next) {
+			if(!state.id_member) {
+				next('Member does not exist!');
+			} else {
+				next();
+			}
+		},
+		sql.query('UPDATE '+smf.dbprefix+'members SET ' + sets.join(', ') + ' WHERE id_member = :id_member')
+	);
+	
+	update(values, next);
 };
 
 /* EOF */
