@@ -120,10 +120,12 @@ if(argv.users) {
 	core.listUsers(function(err, result) {
 		if(err) {
 			console.log('Error: ' + err);
+			process.exit(1);
 			return;
 		}
 		if(!(result && result._rows)) {
 			console.log('Error: No results.');
+			process.exit(1);
 			return;
 		}
 		var rows = result._rows, actions = [];
