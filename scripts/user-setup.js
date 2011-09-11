@@ -129,17 +129,21 @@ if(argv.users) {
 		var rows = result._rows, actions = [];
 		foreach(rows).each(function(row) {
 			actions.push(function(state, next) {
+				console.log('Running user #' + row.user_id + '...');
 				setupUser(row, function(err) {
 					if(err) console.log('Error: ' + err);
+					else console.log('Done #' + row.user_id);
 					next();
 				});
 			});
 		});
+		console.log('Going to run ' + actions.length + ' users:');
 		(sql.group.apply(sql, actions))(function(err) {
 			if(err) {
 				console.log('Error: ' + err);
 				process.exit(1);
 			} else {
+				console.log('Done ALL.');
 				process.exit(0);
 			}
 		});
