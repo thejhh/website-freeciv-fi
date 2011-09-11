@@ -101,10 +101,10 @@ mediawiki.createUser = function(args, next) {
 	if(!args.email) throw new TypeError('email required');
 	if(!args.password) throw new TypeError('password required');
 	
-	args.realname = trim(''+ (args.realname||'') );
 	args.username = trim(''+args.username);
 	args.email = trim(''+args.email);
 	args.password = trim(''+args.password);
+	args.realname = trim(''+ (args.realname||args.username) );
 	
 	if(args.username.length.length < 3) throw new TypeError('username too short!');
 	if(args.email.length < 5) throw new TypeError('email too short!');
@@ -161,8 +161,10 @@ mediawiki.changePassword = function(args, next) {
 	if(args.username.length.length < 3) throw new TypeError('username too short!');
 	if(args.password.length < 8) throw new TypeError('password too short!');
 	
+	var wiki_user_name = args.username[0].toUpperCase() + args.username.substr(1);
+	
 	var values = {
-		'user_name': args.username,
+		'user_name': wiki_user_name,
 		'user_password': mediawiki.createPassword(args.password)
 	};
 	
