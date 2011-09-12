@@ -13,9 +13,13 @@ fieldset
 	a(href='/profile/edit', class='button positive')
 		img(src='/images/blueprint/plugins/buttons/icons/key.png', alt='')
 		| Muokkaa tietoja
-	hr
-	| Käyttäjätunnuksen tarvitset
-	a(href='http://freeciv.fi/wiki',target='_blank') wikissä
-	|  ja 
-	a(href='http://forum.freeciv.fi',target='_blank') foorumilla
-	| .
+	div(class='small')
+		hr
+		- if(!session.user.name)
+			| Käyttäjätunnus on julkisesti näkyvä pelaajan tunniste, jota ei voi siirtää toiselle käyttäjälle. (Otteluiden hallitsijanimi voidaan siirtää toiselle pelaajalle pelipaikan mukana.) Valitse tunnus harkiten, sillä sen vaihtaminen myöhemmin vaatii yhteydenoton ylläpitäjään.
+		br
+		| Käyttäjätunnuksella kirjaudutaan 
+		a(href='http://freeciv.fi/wiki',target='_blank') wikiin
+		|  ja 
+		a(href='http://forum.freeciv.fi',target='_blank') foorumille
+		| .
