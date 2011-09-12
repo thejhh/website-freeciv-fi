@@ -14,10 +14,10 @@ fieldset
 		img(src='/images/blueprint/plugins/buttons/icons/key.png', alt='')
 		| Muokkaa tietoja
 	div(class='small')
-		hr
 		- if(!session.user.name)
-			| Käyttäjätunnus on julkisesti näkyvä pelaajan tunniste, jota ei voi siirtää toiselle käyttäjälle. (Otteluiden hallitsijanimi voidaan siirtää toiselle pelaajalle pelipaikan mukana.) Valitse tunnus harkiten, sillä sen vaihtaminen myöhemmin vaatii yhteydenoton ylläpitäjään.
-		br
+			hr
+			| Käyttäjätunnus on julkinen pelaajan tunniste, jota ei voi siirtää toiselle pelaajalle. Valitse tunnus harkiten, sillä sen vaihtaminen myöhemmin vaatii yhteydenoton ylläpitäjään.
+		hr
 		| Käyttäjätunnuksella kirjaudutaan 
 		a(href='http://freeciv.fi/wiki',target='_blank') wikiin
 		|  ja 
