@@ -1,40 +1,31 @@
 Hei,
 
-Uusi Syyskuun Freeciv-pelimme on viimein alkanut. Mukana on historiallinen 126 
-pelaajaa!
+Uusi Syyskuun Freeciv-pelimme on päässyt hyvään alkuun. Mukana on päivittäin 
+yli 100 pelaajaa!
 
-Ensimmäinen vuoro on varmuuden vuoksi normaalia pidempi ja kestää keskiviikkoon 
-klo 20:00 asti, jotta kaikki ehtivät varmasti mukaan.
+Olemme perustaneet keskustelualueen helpottaaksemme pelaajien viestintää.
 
-Pelipalvelimen käyttäjätunnuksenne ja palvelimen tiedot löydätte 
-sisäänkirjautumisen jälkeen osoitteesta:
+ - Käyttäjätunnukset foorumille (ja wikiin) syntyvät automaattisesti 
+   kun kirjaudutte kerran osoitteessa: http://game.freeciv.fi/login
 
-	http://game.freeciv.fi/
+ - Mikäli teillä ei ole aikaisempaa wikitunnusta, tarvitsee teidän myös asettaa 
+   käyttäjätunnus profiilisivultanne.
+
+Sisäänkirjautuminen pelipalveluun:
+
+	http://game.freeciv.fi/login
 
 Unohtuneen salasanan voi vaihtaa osoitteessa:
 
 	http://game.freeciv.fi/login/reset
 
-Pelaamiseen tarvitset Freeciv 2.3.0 -ohjelman osoitteesta:
+Keskusteluryhmät ovat osoitteesta:
 
-	http://www.freeciv.org
+	http://forum.freeciv.fi
 
-Mikäli teillä on ongelmia pelin aloittamisessa, kysykää asiasta joko 
-vastaamalla tähän viestiin tai osallistumalla keskusteluihin muiden pelaajien 
-kanssa Facebookissa tai IRC:ssä.
+Wiki on osoitteesta:
 
-Pelin tiedotteita kerromme pääasiassa Facebookissa ja IRC:ssä:
-
-Tämän ottelun tapahtuma:
-
-	http://www.facebook.com/event.php?eid=247270245303591
-
-Facebook ryhmämme: 
-
-	http://www.facebook.com/group.php?gid=143021456183
-
-IRCNet: #freeciv.fi
+	http://freeciv.fi/wiki
 
 -- 
-Freeciv.fi:n ylläpitäjä,
-Jaakko Heusala <jheusala@freeciv.fi>
+Suomen Freeciv-pelaajat <freeciv@freeciv.fi>

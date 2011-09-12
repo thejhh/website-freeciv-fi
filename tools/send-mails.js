@@ -15,9 +15,9 @@ function do_sendmail(to_email) {
 	nodemailer.send_mail(
 	    // e-mail options
 	    {
-	        sender: 'Jaakko Heusala <jheusala@freeciv.fi>',
+	        sender: 'Suomen Freeciv-pelaajat <freeciv@freeciv.fi>',
 	        to:to_email,
-	        subject:'Uusi Freeciv-pelimme on alkanut',
+	        subject:'Perustimme keskustelualueen',
 	        body:msg_body
 	    },
 	    // callback function
