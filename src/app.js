@@ -9,8 +9,8 @@
 var express = require('express'),
     params = require('express-params'),
     request = require('request'),
-	config = require('./config.js'),
-	site_url = config.url || 'http://game.freeciv.fi',
+    config = require('./config.js'),
+    site_url = config.url || 'http://game.freeciv.fi',
     sys = require('sys'),
     core = require('./core.js'),
     util = require('util'),
@@ -486,10 +486,11 @@ function prepSQLRowBy(table, key) {
 
 /* Relink request property also as next key */
 function prepRename(next_key, prev_key) {
-	var keys = (""+prev_key).split(".");
-	util.log('prepRename: keys = ' + sys.inspect(keys));
+	util.log('prepRename: next_key = ' + next_key + ', prev_key = ' + prev_key);
 	return function(req, res, next) {
 		try {
+			var keys = (""+prev_key).split(".");
+			
 			function lookup(obj) {
 				util.log('prepRename: keys = ' + sys.inspect(keys));
 				if(obj !== req) {

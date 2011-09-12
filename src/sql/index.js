@@ -79,7 +79,7 @@ _lib.table = function(table) {
 				return this;
 			},
 			'exec':function(callback) {
-				console.log('Updating table %s with %s', table, sys.inspect(options));
+				//console.log('Updating table %s with %s', table, sys.inspect(options));
 				return _lib.update(table, options, callback);
 			}
 		});
