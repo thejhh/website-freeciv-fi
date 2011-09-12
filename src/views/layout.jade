@@ -19,9 +19,18 @@ html
 			})();
 	body
 		div(class='container')
+			div(class='header')
+				a(href='/')
+					img(src="/images/intro-page.png", alt="")
+			div(class='title')
+				h3= title
 			div(class='links')
 				| [ 
 				a(href='/game') Ottelut
+				|  |
+				a(href='http://forum.freeciv.fi',target='_blank') Foorumi
+				|  |
+				a(href='http://freeciv.fi/wiki',target='_blank') Wiki
 				|  |
 				- if(session && session.user)
 					a(href='/profile') Käyttäjätiedot
@@ -30,11 +39,6 @@ html
 				- else
 					a(href='/login') Kirjaudu sisään
 				|  ]
-			div(class='header')
-				a(href='/')
-					img(src="/images/intro-page.png", alt="")
-			div(class='title')
-				h3= title
 			div(class='content')
 				!= partial('flash')
 				!= body

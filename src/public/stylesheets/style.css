@@ -5,17 +5,15 @@ body {
 }
 
 .links {
-	background: #000000;
-	color: #ffffff;
+	background: #ffffff;
+	color: #000000;
+	padding: 10px;
+	text-align: right;
 	font-size: 16pt;
-	position: absolute;
-	top: 280px;
-	right: 0;
-	padding: 20px;
 }
 
 .links a {
-	color: #ffffff;
+	/* color: #000000; */
 }
 
 .header {
