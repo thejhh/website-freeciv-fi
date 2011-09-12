@@ -134,17 +134,15 @@ table(class='playerlist')
 		th Pelipaikka
 		th Kansa
 		th Hallitsija
-		th(class='right') Pelaaja
 	- each player, i in work.players
 		tr
 			td= player.number
 			td= player.nation
-			td= player.name
-			td(class='right')
+			td
+				= player.name
 				- if(player.game_username)
+					|  
 					i @#{player.game_username}
-				- else
-					&nbsp;
 					
 hr
 div(class='sponsors')
