@@ -61,3 +61,11 @@ body {
 	left: 50px;
 */
 }
+
+td.left {
+	text-align: left;
+}
+
+td.right {
+	text-align: right;
+}

@@ -128,21 +128,24 @@ p
 	a(href="http://www.v2.fi/artikkelit/pelit/6/Vapaa-oli-sivilisaationi/") Vapaa oli sivilisaationi 15.04.2007
 	| .
 
-table
+table(class='playerlist')
 	caption Pelaajat
 	tr
 		th Pelipaikka
 		th Kansa
 		th Hallitsija
+		th(class='right') Pelaaja
 	- each player, i in work.players
 		tr
 			td= player.number
 			td= player.nation
-			td
-				= player.name
+			td= player.name
+			td(class='right')
 				- if(player.game_username)
-					| 
 					i @#{player.game_username}
+				- else
+					&nbsp;
+					
 hr
 div(class='sponsors')
 	| Yhteistyössä mukana: 
