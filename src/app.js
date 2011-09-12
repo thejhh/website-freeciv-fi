@@ -760,7 +760,7 @@ function updateGamePlayerList() {
 			var list_game_players = sql.group(
 				sql.connect(),
 				sql.query(
-					'SELECT r.number, p.*, a.name AS username '+
+					'SELECT r.number, p.*, a.name AS username, u.name AS game_username'+
 					' FROM reg AS r '+
 					' LEFT JOIN player AS p ON r.reg_id=p.reg_id '+
 					' LEFT JOIN user AS u ON r.user_id=u.user_id '+
