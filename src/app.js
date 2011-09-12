@@ -431,7 +431,13 @@ function prepBodyName(key1) {
 			}
 			var name = trim(""+req.body[key1]).toLowerCase();
 			if(name.length < 3) {
-				throw new WebError("Käyttäjätunnuksen tulee olla vähintään kolme (3) merkkiä pitkä");
+				throw new WebError("Käyttäjätunnuksen tulee olla vähintään kolme (3) ja korkeintaan 32 merkkiä pitkä");
+			}
+			if(name.length >= 32) {
+				throw new WebError("Käyttäjätunnuksen tulee olla vähintään kolme (3) ja korkeintaan 32 merkkiä pitkä");
+			}
+			if(!name.match(/^[a-z][a-z0-9\_]+$/)) {
+				throw new WebError("Käyttäjätunnus ei saa sisältää muita merkkejä kuin a-z, 0-9 tai alaviivan (_). Ensimmäinen merkki tulee olla a-z.");
 			}
 			req.work[key1] = name;
 		} catch(e) {
