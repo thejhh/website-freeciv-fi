@@ -58,7 +58,7 @@ smf.registerMember = function(args, next) {
 			'passwd': args.crypted_password,
 			'password_salt': hash.createToken(4), // AFAIK this isn't even used inside SMF?
 			'posts': 0,
-			'date_registered': new Date(),
+			'date_registered': Math.round((new Date()).getTime()/1000),
 			'member_ip': args.member_ip || '127.0.0.1',
 			'member_ip2': args.member_ip2 || '127.0.0.1',
 			'validation_code': '',
