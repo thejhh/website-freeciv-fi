@@ -25,7 +25,17 @@ tables.reg.select('r.reg_id AS reg_id',
 		    number = row.number,
 		    reg_id = row.reg_id,
 		    user_id = row.user_id,
-		    username = (""+name).toLowerCase().replace(/[äÄåÅáàâãä]/g, 'a').replace(/[öÖóòõôö]/g, 'o').replace(/'/g, "").replace(/[^a-z0-9_]+/g, "_").substr(0, 32).replace(/^_+/g, "").replace(/_+$/, "").replace(/_+/g, "_");
+		    username = (""+name).toLowerCase()
+		                .replace(/[äÄåÅáàâãä]/g, 'a')
+		                .replace(/[öÖóòõôö]/g, 'o')
+		                .replace(/'/g, "")
+		                /*jslint regexp: false*/
+		                .replace(/[^a-z0-9_]+/g, "_")
+		                /*jslint regexp: true*/
+		                .substr(0, 32)
+		                .replace(/^_+/, "")
+		                .replace(/_+$/, "")
+		                .replace(/_+/g, "_");
 		console.log("Creating account name for player #" + row.number + " as '" + username +"' (from '" + name + "')...");
 		
 		console.log("number = " + sys.inspect(number));

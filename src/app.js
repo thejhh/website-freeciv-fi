@@ -1180,6 +1180,40 @@ function prepFreecivData(key) {
 	};
 }
 
+/* Setup notifications */
+function setupNotifications() {
+	util.log('setupNotifications: start');
+	return function(req, res, next) {
+		try {
+			/*
+			if(!req.work.raw_password) {
+				next();
+				return;
+			}
+			core.setupUser( 
+				(function() {
+					var obj = {};
+					foreach(req.session.user).each(function(v, k) {
+						obj[k] = v;
+					});
+					obj.raw_password = req.work.raw_password;
+					return obj;
+				}()),
+				function(err) {
+					if(err) {
+						util.log('Error in setupCoreUser: ' + sys.inspect(err) + " [ignored]");
+					}
+					next();
+				});
+			*/
+			
+			next();
+		} catch(e) {
+			next(e||new TypeError('Error'));
+		}
+	};
+}
+
 // Routes
 
 /* Root route */
