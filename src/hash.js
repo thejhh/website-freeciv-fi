@@ -1,7 +1,7 @@
+/* Hash Functions by @jheusala */
+
 /* for node-lint */
 /*global Buffer: false, clearInterval: false, clearTimeout: false, console: false, global: false, module: false, process: false, querystring: false, require: false, setInterval: false, setTimeout: false, util: false, __filename: false, __dirname: false */
-
-/* Hash Functions */
 
 var crypto = require('crypto'),
     hash = module.exports = {};
