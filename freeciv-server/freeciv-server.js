@@ -43,7 +43,7 @@ function main() {
 		console.log('command executed: ' + cmd);
 	});
 	
-	var io = require('socket.io').listen(8000);
+	var io = require('socket.io').listen(config.port || 8000);
 	io.sockets.on('connection', function (socket) {
 		
 		socket.once('login', function (authkey) {

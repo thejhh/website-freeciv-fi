@@ -2,7 +2,8 @@
 
 var io = require('socket.io-client'),
     config = require('./config.js'),
-    socket = io.connect('http://localhost:8000'),
+    socket_port = config.port || 8000,
+    socket = io.connect('http://localhost:' + socket_port),
 	connected = false;
 
 socket.on('error', function(msg) {

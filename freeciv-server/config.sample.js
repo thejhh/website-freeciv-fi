@@ -1,5 +1,7 @@
 var config = module.exports = {};
 
+config.port = 45345;
+
 config.authkey = '12345';
 
 config.logfile = 'log/civ.log';
