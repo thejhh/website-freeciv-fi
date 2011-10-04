@@ -14,7 +14,8 @@
   "dependencies": {
     "init": "*",
     "socket.io": "*",
-    "socket.io-client": "*"
+    "socket.io-client": "*",
+    "optimist": "*"
   },
   "devDependencies": {}
 }

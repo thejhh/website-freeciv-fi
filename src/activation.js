@@ -51,4 +51,14 @@ _lib.create = function(data, callback) {
 	});
 };
 
+/* Remove obsolete activation keys */
+_lib.clean = function(callback) {
+	_db.view('all', function (err, res) {
+		res.forEach(function(row) {
+			
+		});
+		callback(err, res);
+	});
+};
+
 /* EOF */
