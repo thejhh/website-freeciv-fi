@@ -71,6 +71,36 @@ core.setupUser = sql.group(
 		next();
 	},
 	core.checkPasswords,
+	// Check if this user exists in the SMF forum (by email) and create account if we can
+	function(user, next) {
+		// FIXME: If there is errors when creating smf account, wiki account will not be created.
+		smf.getMemberByEmail({'email_address': user.email}, function(err, result) {
+			if(err) {
+				next(err);
+				return;
+			}
+			
+			// Skip if account exists
+			if(result.id_member) {
+				next();
+				return;
+			}
+			
+			// Try to create new account
+			var data;
+			if(user.email && user.name && user.smf_password) {
+				data = {'email':user.email, 'username':user.name, 'crypted_password':user.smf_password};
+			} else if(user.email && user.name && user.raw_password) {
+				data = {'email':user.email, 'username':user.name, 'password':user.raw_password};
+			} else {
+				// Skip if no data to create account
+				next();
+				return;
+			}
+			smf.registerMember(data, next);
+		});
+	}
+	core.checkPasswords,
 	// Check if this user exists in the MediaWiki (by email) and create account if we can
 	function(user, next) {
 		mediawiki.getUserByEmail({'user_email': user.email}, function(err, result) {
@@ -133,35 +163,6 @@ core.setupUser = sql.group(
 			
 		});
 	},
-	core.checkPasswords,
-	// Check if this user exists in the SMF forum (by email) and create account if we can
-	function(user, next) {
-		smf.getMemberByEmail({'email_address': user.email}, function(err, result) {
-			if(err) {
-				next(err);
-				return;
-			}
-			
-			// Skip if account exists
-			if(result.id_member) {
-				next();
-				return;
-			}
-			
-			// Try to create new account
-			var data;
-			if(user.email && user.name && user.smf_password) {
-				data = {'email':user.email, 'username':user.name, 'crypted_password':user.smf_password};
-			} else if(user.email && user.name && user.raw_password) {
-				data = {'email':user.email, 'username':user.name, 'password':user.raw_password};
-			} else {
-				// Skip if no data to create account
-				next();
-				return;
-			}
-			smf.registerMember(data, next);
-		});
-	}
 );
 
 /* EOF */
