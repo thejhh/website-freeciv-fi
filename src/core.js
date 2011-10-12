@@ -99,7 +99,7 @@ core.setupUser = sql.group(
 			}
 			smf.registerMember(data, next);
 		});
-	}
+	},
 	core.checkPasswords,
 	// Check if this user exists in the MediaWiki (by email) and create account if we can
 	function(user, next) {
@@ -162,7 +162,7 @@ core.setupUser = sql.group(
 			))(result, next);
 			
 		});
-	},
+	}
 );
 
 /* EOF */
